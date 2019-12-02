@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="../webjars/layui/css/layui.css"  media="all">
+</head>
+
+<body>
+
+<div th:fragment="basicinfo" class="basicinfo">
+    <div class="layui-form-item" id="item_name">
+        <div class="layui-inline">
+            <label class="layui-form-label">姓名：</label>
+            <div class="layui-input-inline">
+                <input type="tel" name="name"  autocomplete="off" class="layui-input">
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item" id="item_age">
+        <div class="layui-inline">
+            <label class="layui-form-label">年龄：</label>
+            <div class="layui-input-inline">
+                <input type="text" name="age" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item" id="item_mobile">
+        <div class="layui-inline">
+            <label class="layui-form-label">手机：</label>
+            <div class="layui-input-inline">
+                <input type="tel" name="mobile" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item" id="item_education">
+        <div class="layui-inline">
+            <label class="layui-form-label">教育程度：</label>
+            <div class="layui-input-inline">
+                <input name="education" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item" id="item_occupation">
+        <div class="layui-inline">
+            <label class="layui-form-label">工作：</label>
+            <div class="layui-input-inline">
+                <input name="occupation" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

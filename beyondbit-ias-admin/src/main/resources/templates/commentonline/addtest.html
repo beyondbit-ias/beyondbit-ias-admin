@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="common::commonHeader(新增问卷)"></head>
+<style>
+    .width500{max-width:500px;}
+    .width200{max-width:200px;}
+</style>
+<body>
+<div class="whitebg pd10">
+<fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+    <legend>评议管理</legend>
+</fieldset>
+<div class="layui-form" lay-filter="testform">
+    <div class="layui-form-item">
+        <label class="layui-form-label">评议名称</label>
+        <div class="layui-input-block width500">
+            <input type="text" name="testname"   required  lay-verify="required" placeholder="请输入评议名称" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">评议类型</label>
+        <div class="layui-input-block width200">
+            <select name="testtype" lay-filter="testtype">
+                <option value="1">问卷</option>
+                <option value="2">投票</option>
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">公开结果</label>
+        <div class="layui-input-block">
+            <input type="radio" name="ispublish" value="1" title="是" checked="">
+            <input type="radio" name="ispublish" value="0" title="否">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">评议状态</label>
+        <div class="layui-input-block width200">
+            <select name="teststatus" lay-filter="teststatus">
+                <option value="1">发布</option>
+                <option value="2">未发布</option>
+                <option value="3">已结束</option>
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">答题频率</label>
+        <div class="layui-input-block">
+            <input type="radio" name="answerfrequency" value="1" title="每天投票一次" checked="">
+            <input type="radio" name="answerfrequency" value="2" title="只能投票一次">
+            <input type="radio" name="answerfrequency" value="3" title="可无限次投票">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">答题对象</label>
+        <div class="layui-input-block">
+            <input type="radio" name="answerobject" lay-filter="answerobject" value="1" title="仅注册用户答题" checked="">
+            <input type="radio" name="answerobject" lay-filter="answerobject"  value="2" title="限制IP答题">
+            <input type="radio" name="answerobject" lay-filter="answerobject"  value="3" title="可匿名答题">
+            <input type="radio" name="answerobject" lay-filter="answerobject" value="4" title="选择征集对象">
+        </div>
+    </div>
+    <div class="layui-form-item" id="boxIpLimit" style="display: none;">
+        <div class="layui-inline">
+            <label class="layui-form-label">IP限定</label>
+            <div class="layui-input-inline" style="width: 100px;">
+                <input type="text" name="iplimitstart" id="iplimitstart" lay-verify="ip"  autocomplete="off" class="layui-input">
+            </div>
+            <div class="layui-form-mid">-</div>
+            <div class="layui-input-inline" style="width: 100px;">
+                <input type="text" name="iplimitend" id="iplimitend" lay-verify="ip"  autocomplete="off" class="layui-input">
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-form-item" id="boxTestUserids" style="display: none;">
+        <div class="layui-inline">
+            <label class="layui-form-label">征集对象</label>
+            <div class="layui-input-inline">
+                <input type="text" name="pname" id="pname" class="layui-input">
+            </div>
+            <div class="layui-inline">
+                <input type="button" class="layui-btn group-select layui-btn-sm" style="margin-top:5px;" onclick="openDicSelector(this)"
+                       value="选择征集对象" />
+                <input type="hidden" name="testuserids" id="testuserids" />
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">返回地址</label>
+        <div class="layui-input-block width500">
+            <input type="text" name="returnurl"  placeholder="请输入返回地址" autocomplete="off" class="layui-input" value="http://">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">编码</label>
+        <div class="layui-input-block width200">
+            <input type="text" name="code"  placeholder="请输入编码" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">排序</label>
+        <div class="layui-input-block width200">
+            <input type="text" name="sequence"  placeholder="请输入排序" autocomplete="off" class="layui-input" value="100">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">描述</label>
+        <div class="layui-input-block width500">
+            <textarea placeholder="请输入内容" class="layui-textarea" name="description"></textarea>
+        </div>
+    </div>
+    <input type="hidden" id="id" name="id"/>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn" lay-submit="" lay-filter="btnCreate">保存</button>
+        </div>
+    </div>
+</div>
+</div>
+<script src="../webjars/layui/layui.js" charset="utf-8"></script>
+<script type="text/javascript" src="../webjars/jquery/jquery.js"></script>
+<script type="text/javascript" src="../js/commonJs.js"></script>
+<script>
+    layui.use('form', function(){
+        var form = layui.form; //select,radio默认隐藏，执行到这一步正常显示
+        form.render();
+        var testid="";
+        if(GetQueryString("id")!=null && GetQueryString("id")!="")
+            testid=GetQueryString("id");
+        //监听提交
+        form.on('submit(btnCreate)', function(data){
+            $.ajax({
+                url: "../commentonline/savetest",
+                data: data.field,
+                success: function (data) {
+                    console.log(data);
+                    if(data>0) {
+                        layer.msg("保存成功");
+
+                        var url = "../commentonline/topicmanager?id="+data;
+                        setTimeout("window.location.href='" + url + "'", 1500);
+                    }
+                    else {
+                        layer.msg(data.msg);
+                        return false;
+                    }
+                }
+            })
+            return false;
+        });
+        //答题对象选择效果，监听radio的click
+        form.on('radio(answerobject)', function(data){
+            var selectValue=data.value;//被点击的radio的value值
+            if (selectValue == 2) {
+                $("#boxIpLimit").show();
+                $("#boxTestUserids").hide();
+            } else {
+                $("#boxIpLimit").hide();
+                $("#iplimitstart").val("");
+                $("#iplimitend").val("");
+                if (selectValue == 4) {
+                    $("#boxTestUserids").show();
+                } else {
+                    $("#boxTestUserids").hide();
+                }
+
+            }
+        });
+
+        form.verify({
+            ip: function(value, item){ //value：表单的值、item：表单的DOM对象
+                if($("#boxIpLimit").css("display")!="none") {
+                    if (value == "") {
+                        return '请输入IP限定范围';
+                    }
+
+                    var regIP = /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/;
+                    if (regIP.test(value)) {
+                        return '输入的限定IP地址格式不正确';
+                    }
+                }
+            }
+
+            //我们既支持上述函数式的方式，也支持下述数组的形式
+            //数组的两个值分别代表：[正则匹配、匹配不符时的提示文字]
+            ,pass: [
+                /^[\S]{6,12}$/
+                ,'密码必须6到12位，且不能出现空格'
+            ]
+        });
+
+
+        //编辑
+        if( testid!="") {
+            $.ajax({
+                url: "../commentonline/getTest",
+                data:{"id": testid},
+                success: function (data) {
+                    console.log(data);
+                    form.val('testform', {
+                        "id":data.id,
+                        "testname":data.testname,
+                        "testtype":data.testtype,
+                        "ispublish":data.ispublish,
+                        "teststatus": data.teststatus,
+                        'answerfrequency':data.answerfrequency,
+                        'answerobject':data.answerobject,
+                        'iplimitstart':data.iplimitstart,
+                        'iplimitend':data.iplimitend,
+                        'pname':data.pname,
+                        'testuserids':data.testuserids,
+                        'returnurl':data.returnurl,
+                        'code':data.code,
+                        'sequence':data.sequence,
+                        'description':data.description
+                    })
+
+                }
+            })
+        }
+    });
+
+    //选择上级目录点击事件
+    function openDicSelector(obj)
+    {
+        var parentid=$("#parentid").val();
+        console.log("parentid",parentid);
+        var url="getCommonselector";
+        if(parentid!="")
+            url="getCommonselector?parentid="+parentid;
+        layui.use(['layer'], function () {
+            var layer = layui.layer;
+            layer.open({
+                type: 2,
+                title: $(obj).val(),
+                shadeClose: false,
+                shade: 0.6,
+                area: ['380px', '100%'],
+                content: url,
+                btn: ['选择','重置', '取消'],
+                yes: function (index, layero) {
+                    // 调用子页面返回值函数
+                    var data=$(layero).find("iframe")[0].contentWindow.returnData();
+                    console.log("2",data);
+                    $("#pname").val(data.name);
+                    $("#parentid").val(data.id);
+                    if(data.id=="1") {
+                        $("select option:last").attr("disabled", "disabled");
+                        layui.selectRender();
+                    }
+                    else {
+                        $("select option:last").removeAttr("disabled");
+                        layui.selectRender();
+                    }
+
+                    layer.close(index);
+
+                },
+                btn1: function (index, layero) {
+
+                    layer.close(index);
+                },
+                btn2: function (index, layero) {
+
+                    layer.close(index);
+                }
+            });
+        })
+
+    }
+
+
+</script>
+</body>
+</html>

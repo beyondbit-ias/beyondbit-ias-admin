@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div>
+    <p>当前用户：<span th:text="${name}"></span></p>
+    <p>当前部门：<span th:text="${deptname}"></span></p>
+    <p><span th:text="${webconfig}"></span></p>
+    <form th:action="@{/logout}" method="post">
+        <input id="logout" type="submit" value="退出登录"/>
+    </form>
+</div>
+</body>
+</html>

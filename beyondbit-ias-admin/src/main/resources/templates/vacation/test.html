@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>字典项选择</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../webjars/layui/css/layui.css" media="all">
+</head>
+</html>
+<script type="text/javascript" src="../webjars/jquery/jquery.js"></script>
+<script>
+    $.ajax({
+        url: "../vacation/getEndTime",
+        data: {starttime:new Date(),interval:6},
+        success: function (data) {
+            console.log(data,new Date())
+        }
+    })
+</script>

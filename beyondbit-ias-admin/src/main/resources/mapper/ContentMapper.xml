@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.beyondbit.ias.admin.dao.ContentMapper">
+
+
+    <select id="get" resultType="com.beyondbit.ias.admin.entity.Content">
+        SELECT ID,UUID,TITLE,SUB_TITLE,KEYWORDS,URL,SOURCE,START_TIME,
+        END_TIME,CONTENT,ABSTRACT,CREATE_TIME,AUTHOR,IS_DELETE
+        FROM ${dbSchema}ADMIN_INFOPUBLISH_CONTENT
+        WHERE 1=1
+        <if test="uuid != null and uuid !=''">
+            AND UUID = #{uuid}
+        </if>
+        <if test="isDelete != null and isDelete !=''">
+            AND IS_DELETE = #{isDelete}
+        </if>
+    </select>
+
+    <insert id="insert" parameterType="com.beyondbit.ias.admin.entity.Content">
+        INSERT INTO ${dbSchema}ADMIN_INFOPUBLISH_CONTENT
+        (UUID,TITLE,SUB_TITLE,KEYWORDS,URL,SOURCE,START_TIME,
+        END_TIME,CONTENT,ABSTRACT,CREATE_TIME,AUTHOR,IS_DELETE)
+        VALUES(#{uuid},#{title},#{subTitle},#{keyWords},#{url},#{source},#{startTime},
+        #{endTime},#{content},#{abstract},#{createTime},#{author},#{isDelete});
+    </insert>
+
+    <update id="update">
+        UPDATE ${dbSchema}ADMIN_INFOPUBLISH_CONTENT
+        SET
+        TITLE = #{title},
+        SUB_TITLE = #{subTitle},
+        KEYWORDS = #{keyWords},
+        URL = #{url},
+        SOURCE = #{source},
+        START_TIME = #{startTime},
+        END_TIME = #{endTime},
+        CONTENT = #{content},
+        ABSTRACT = #{abstract},
+        CREATE_TIME = #{createTime},
+        AUTHOR = #{author},
+        IS_DELETE = #{isDelete}
+        WHERE UUID = #{uuid};
+    </update>
+
+    <delete id="delete">
+        UPDATE ${dbSchema}ADMIN_INFOPUBLISH_CONTENT
+        SET IS_DELETE = 1
+        WHERE UUID = #{uuid} AND IS_DELETE = #{isDelete};
+    </delete>
+
+    <select id="queryList" parameterType="com.beyondbit.ias.admin.entity.Content" resultType="com.beyondbit.ias.admin.entity.dto.ContentDTO">
+        SELECT c.ID,c.UUID,c.TITLE,c.SUB_TITLE,c.KEYWORDS,c.URL,c.SOURCE,c.ABSTRACT,c.START_TIME,
+        c.END_TIME,c.CONTENT,c.CREATE_TIME,c.AUTHOR,c.IS_DELETE,scs.IS_VISIBLE,scs.SEQUENCE,
+        scs.CONTENT_UUID,scs.SUBJECT_UUID,scs.Name as SUBJECT_NAME,scs.UUID as CONTENTSUBJECT_UUID
+        FROM (
+        SELECT cs.ID,cs.UUID,cs.CONTENT_UUID,cs.SUBJECT_UUID,cs.VIEW_COUNT,cs.IS_VISIBLE,cs.SEQUENCE,cs.REVIEW_TIME,cs.REVIEWER,cs.REVIEW_OPINION,cs.IS_DELETE,s.Name
+        FROM ${dbSchema}ADMIN_INFOPUBLISH_CONTENTSUBJECT AS cs
+        LEFT JOIN ${dbSchema}ADMIN_INFOPUBLISH_SUBJECT AS s ON cs.SUBJECT_UUID = s.UUID
+        ) AS scs
+        LEFT JOIN ${dbSchema}ADMIN_INFOPUBLISH_CONTENT AS c ON c.UUID = scs.CONTENT_UUID
+        WHERE 1=1
+        <if test="c_uuid != null and c_uuid !=''">
+            AND c.UUID = #{c_uuid}
+        </if>
+        <if test="cs_subjectUUIDList != null and cs_subjectUUIDList !=''">
+            AND scs.SUBJECT_UUID IN
+            <foreach collection="cs_subjectUUIDList" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="c_title!=null and c_title!=''">
+            AND c.TITLE LIKE "%"#{c_title}"%"
+        </if>
+        <if test="c_keyWords!=null and c_keyWords!=''">
+            AND c.KEYWORDS LIKE "%"#{c_keyWords}"%"
+        </if>
+        <if test="c_startTime!=null and c_startTime!=''">
+            AND c.START_TIME &gt;= #{c_startTime}
+        </if>
+        <if test="c_endTime!=null and c_endTime!=''">
+            AND c.END_TIME &lt;= #{c_endTime}
+        </if>
+
+        <if test="cs_isDelete != null and cs_isDelete !=''">
+            AND scs.IS_DELETE = #{cs_isDelete}
+        </if>
+        <if test="c_isDelete != null and c_isDelete !=''">
+            AND c.IS_DELETE = #{c_isDelete}
+        </if>
+    </select>
+</mapper>

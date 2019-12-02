@@ -1,0 +1,10 @@
+/*body上添加#pink*/
+
+  .layui-layout-admin .layui-header {
+    background-color:  #ffbfd4
+  }
+
+  .layui-bg-black {
+    background-color: #ffeff9!important
+  }
+.layui-nav{background-color: #ffeff9!important}

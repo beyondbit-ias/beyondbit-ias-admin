@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.beyondbit.ias.admin.dao.AttachmentMapper">
+    <insert id="insert" parameterType="com.beyondbit.ias.admin.entity.Attachment" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO ${dbSchema}CORE_ATTACHMENT
+        (REFTABLEID,REFTABLENAME,DISPLAYNAME,NAME,EXTENSION,RELATIVEPATH,
+        INTERNALNAME,CONTENTTYPE,LENGTH,CONTENT,TYPECODE,PERSISTENTTYPE,CREATORID,
+        CREATORNAME,CREATORTIME,UPDATETIME,SEQUENCE,ISDELETE)
+        VALUES
+        (#{refTableID},#{refTableName},#{displayName},#{name},#{extension},#{relativePath},#{internalName},
+         #{contentType},#{length},#{content},#{typeCode},#{persistentType},#{creatorID},#{creatorName},
+         #{creatorTime},#{updateTime},#{sequence},#{isDelete});
+    </insert>
+
+    <update id="updateRef">
+        UPDATE ${dbSchema}CORE_ATTACHMENT
+        SET
+            REFTABLEID = #{refTableID},
+            REFTABLENAME = #{refTableName},
+            ISDELETE = #{isDelete}
+        WHERE ID IN
+        <foreach item="item" collection="arrID" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <select id="queryList" parameterType="com.beyondbit.ias.admin.entity.Attachment" resultType="com.beyondbit.ias.admin.entity.Attachment">
+        SELECT ID,REFTABLEID,REFTABLENAME,DISPLAYNAME,NAME,EXTENSION,RELATIVEPATH,
+        INTERNALNAME,CONTENTTYPE,LENGTH,CONTENT,TYPECODE,PERSISTENTTYPE,CREATORID,
+        CREATORNAME,CREATORTIME,UPDATETIME,SEQUENCE,ISDELETE
+        FROM ${dbSchema}CORE_ATTACHMENT
+        WHERE 1=1
+        <if test="arrID != null and arrID.length>0">
+            AND ID IN
+            <foreach item="item" collection="arrID" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="refTableID != null and refTableID != ''">
+            AND REFTABLEID = #{refTableID}
+        </if>
+        <if test="refTableName != null and refTableName != ''">
+            AND REFTABLENAME = #{refTableName}
+        </if>
+        <if test="isDelete != null">
+            AND ISDELETE = #{isDelete}
+        </if>
+    </select>
+
+    <delete id="delete">
+        UPDATE ${dbSchema}CORE_ATTACHMENT
+        SET
+            ISDELETE = 1
+        WHERE ID IN
+        <foreach item="item" collection="idList" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+</mapper>
+

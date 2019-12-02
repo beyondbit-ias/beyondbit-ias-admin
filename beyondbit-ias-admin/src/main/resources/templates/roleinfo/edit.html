@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <title>角色列表</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../webjars/layui/css/layui.css" media="all">
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+</head>
+<style>
+    body {
+        padding: 20px;
+    }
+    .layui-tab-content{
+        bottom: 0;
+        left: 0;
+        position: absolute;
+        right: 0;
+        top:80px;
+        background: #fff;
+    }
+    .layui-tab-item{
+        height:100%;
+    }
+</style>
+
+<body>
+
+<div class="layui-tab layui-tab-card">
+    <ul class="layui-tab-title">
+        <li class="layui-this">基本信息</li>
+        <li>成员信息</li>
+        <li>组织机构权限</li>
+        <li>后台模块权限</li>
+        <li>站点结构权限</li>
+    </ul>
+    <div class="layui-tab-content">
+        <div class="layui-tab-item layui-show">
+            <iframe th:src="@{'../roleinfo/add?roleguid='+${roleguid}}" width="100%" height="100%" frameborder="0"></iframe>
+        </div>
+        <div class="layui-tab-item">
+            <iframe th:src="@{'../userinfo/list?roleguid='+${roleguid}}" width="100%" height="100%" frameborder="0"></iframe>
+        </div>
+        <div class="layui-tab-item">
+            <iframe th:src="@{'../deptinfo/authorize?roleguid='+${roleguid}}" width="100%" height="100%" frameborder="0"></iframe>
+        </div>
+        <div class="layui-tab-item">
+            <iframe th:src="@{'../privilege/authorize?roleguid='+${roleguid}}" width="100%" height="100%" frameborder="0"></iframe>
+        </div>
+        <div class="layui-tab-item">
+            <iframe th:src="@{'../subject/authorize?roleguid='+${roleguid}}" width="100%" height="100%" frameborder="0"></iframe>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript" src="../webjars/jquery/jquery.js"></script>
+<script src="../webjars/layui/layui.js" charset="utf-8"></script>
+
+
+
+</body>
+<script>
+    //注意：选项卡 依赖 element 模块，否则无法进行功能性操作
+    layui.use('element', function(){
+        var element = layui.element;
+    });
+</script>
+
+</html>

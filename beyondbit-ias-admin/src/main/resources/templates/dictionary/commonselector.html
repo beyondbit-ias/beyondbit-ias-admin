@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>字典项选择</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../webjars/layui/css/layui.css" media="all">
+</head>
+<style>
+    .box{height:100%;padding:5px;}
+    .tree{top:0;left:0;bottom:115px;right:0px;position:absolute;overflow: auto;padding:10px;}
+    .bottomtextarea{left:0;bottom:2px;right:0px;height:105px;position:absolute;padding:0 20px;}
+</style>
+<body>
+<div class="box">
+    <div class="tree">
+        <ul id="treeDemo" class="ztree" ></ul>
+    </div>
+    <div class="bottomtextarea">
+        <textarea placeholder="请选择" class="layui-textarea" id="textarea" readonly="ReadOnly"></textarea>
+    </div>
+</div>
+
+<script type="text/javascript" src="../webjars/jquery/jquery.js"></script>
+<script src="../webjars/layui/layui.js" charset="utf-8"></script>
+<script>
+    //选择控件 供父页面调用获取返回值
+    var returnData = function () {
+        var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
+        var nodes = treeObj.getCheckedNodes(true);
+        //console.log("returndata",nodes);
+        return nodes[0];
+    }
+
+
+</script>
+
+
+<link rel="stylesheet" href="../webjars/zTree/css/zTreeStyle/zTreeStyle.css" media="all">
+<script type="text/javascript" src="../webjars/zTree/js/jquery.ztree.core.js"></script>
+<script type="text/javascript" src="../webjars/zTree/js/jquery.ztree.excheck.js"></script>
+<script type="text/javascript" src="../webjars/zTree/js/jquery.ztree.exedit.js"></script>
+<script>
+    var setting = {
+        view: {
+            showIcon: false
+        },
+        check: {
+            enable: true,
+            chkStyle: "radio",
+
+            radioType: "all",
+            chkboxType: {"Y": "", "N": ""}
+        },
+        data: {
+            simpleData: {
+                enable: true
+            }
+        },
+        callback: {
+            onCheck: zTreeOnCheck
+        }
+    };
+
+    function zTreeOnCheck(event, treeId, treeNode) {
+        if(treeNode.checked)
+            $("#textarea").val(treeNode.name);
+        //alert(treeNode.id + ", " + treeNode.name + "," + treeNode.checked);
+    };
+
+    function GetQueryString(name)
+    {
+        var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+        var r = window.location.search.substr(1).match(reg);
+        if(r!=null)return  unescape(r[2]); return null;
+    }
+    $(function () {
+        var parentid=-1;
+        if(GetQueryString("parentid")!=null && GetQueryString("parentid")!="")
+            parentid=GetQueryString("parentid");
+        console.log(parentid,"parentid");
+        $.ajax({
+            url: "../dictionary/getZtree",
+            success: function (data) {
+                //console.log(data);
+                $.fn.zTree.init($("#treeDemo"), setting, data);
+                if(parentid>-1) {
+                    var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
+                    var nodes=treeObj.getNodes();
+                    var	nodes_array = treeObj.transformToArray (nodes);
+
+                    var rootnode = treeObj.getNodes()[0];
+                    //console.log(rootnode);
+                    //默认id为1，code为root，name为菜单管理自动展开
+                    treeObj.expandNode(rootnode, true);
+                    //console.log(nodes_array);
+                    for (var i = 0, l = nodes_array.length; i < l; i++) {
+                        //设置默认选中状态
+                        if(nodes_array[i].id==parentid) {
+                            console.log(parentid);
+                            treeObj.checkNode(nodes_array[i], true, false);
+                            $("#textarea").val(nodes_array[i].name);
+                        }
+                    }
+                }
+            }
+
+        })
+
+    });
+</script>
+
+</body>
+</html>

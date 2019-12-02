@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="common::commonHeader(新增问卷调查)"></head>
+<style>
+
+    .layui-elem-field legend{text-align:center;font-size:14px;}
+    .layui-field-title{margin:20px 0 10px 0;}
+</style>
+<body>
+
+        <blockquote class="layui-elem-quote">
+            议题名称
+        </blockquote>
+        <fieldset class="layui-elem-field layui-field-title">
+            <legend>参与情况</legend>
+        </fieldset>
+        <table id="table" lay-filter="table"></table>
+
+        <script type="text/html" id="barDemo">
+            <a class="layui-btn layui-btn-xs" lay-event="view">查看</a>
+        </script>
+
+
+
+
+
+<script src="../webjars/layui/layui.js" charset="utf-8"></script>
+<script type="text/javascript" src="../webjars/jquery/jquery.js"></script>
+<script type="text/javascript" src="../js/commonJs.js"></script>
+
+<script th:inline="none">
+
+    layui.use(['table', 'form', 'laypage'], function () {
+        var table = layui.table;
+        var form = layui.form;
+        var laypage = layui.laypage;
+        var testid=GetQueryString("id");
+        //方法级渲染
+        table.render({
+            elem: '#table'
+            ,url: '../commentonline/getreplylist'
+            ,where:{testid:testid}
+            ,cols: [[{type:'numbers', title: '序号', width:50, fixed: true}
+                ,{field:'guid', title:''}
+                ,{field:'ip', title: 'IP'}
+                ,{field:'createtime', title: '时间' }
+                ,{field:'creatorname', title: '提交人' }
+                ,{fixed: 'right',title:'数据操作', width:90, align:'center', toolbar: '#barDemo',align:'center'}
+
+            ]]
+            ,id: 'table'
+            ,page: {
+                layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'] //自定义分页布局
+                //,curr: 5 //设定初始在第 5 页
+                //, groups: 1 //只显示 1 个连续页码
+                //, first: false //不显示首页
+                //, last: false //不显示尾页
+                ,limit:10
+            }
+        });
+
+        //监听工具条
+        table.on('tool(table)', function (obj) {
+            var data = obj.data;
+            //监听工具条
+
+            if(obj.event==='view')
+                window.location.href="../commentonline/restoretest?testid="+testid+"&replyguid="+data.guid;
+        });
+
+        $.ajax({
+            url:"../commentonline/getTestName",
+            data:{id:testid},
+            success:function(data){
+                console.log(data);
+                $(".layui-elem-quote").text("议题名称："+data);
+            }
+
+        })
+    });
+
+
+</script>
+
+</body>
+
+</html>

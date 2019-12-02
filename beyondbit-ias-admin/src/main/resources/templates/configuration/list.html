@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="common::commonHeader(配置项列表)">
+</head>
+
+<body>
+
+<blockquote class="layui-elem-quote ">
+    <div class="layui-form">
+        <div class="layui-input-inline" id="sitenamediv" style="float:left;">
+            <!--<select id="optiontype"  runat="server">-->
+            <select id="optiontype" runat="server">
+                <option th:each="item:${dic}" th:value="${item.value}" th:text="${item.name}"></option>
+            </select>
+        </div>
+        <input name="keyname" id="keyname" type="text" style="float:left;width:300px;"  class="layui-input" placeholder="请输入KeyName搜索" autocomplete="off" />
+
+
+        <input type="button" name="btn_Click" value="搜索" id="btn_Click" class="layui-btn layui-btn-normal" style="float:left;margin-left:3px;"/>
+        <a class="a_search querysearch">高级搜索</a>
+        <div class="btnlist">
+            <a class="layui-btn layui-btn-normal" data-type="auto" id="methodInsert" href="../configuration/add" style="margin-top:5px;">新增</a>
+            <a class="layui-btn layui-btn-normal" href="javascript:exportMem();" style="display:none">导出</a>
+            <input type="hidden" id="HDform"/>
+        </div>
+
+    </div>
+
+
+
+    <div class="clear">
+    </div>
+</blockquote>
+<div id="Senior_Search" class="layui-form Inhidden whitebg pd15_20_1" action="" style="height: auto">
+    <div class="layui-row">
+        <div class="layui-form-item">
+            <label class="layui-form-label">KeyName</label>
+            <div class="layui-input-block">
+                <input name="keyname" id="keyname2" type="text"  class="layui-input" autocomplete="off" />
+            </div>
+        </div>
+    </div>
+    <div class="layui-row">
+        <div class="layui-form-item">
+            <label class="layui-form-label">KeyValue</label>
+            <div class="layui-input-block">
+                <input name="value" id="value" type="text"  class="layui-input" autocomplete="off" />
+            </div>
+        </div>
+    </div>
+    <div class="layui-row">
+        <div class="layui-form-item">
+            <label class="layui-form-label">配置项描述</label>
+            <div class="layui-input-block">
+                <input name="describe" id="describe" type="text"  class="layui-input" autocomplete="off" />
+            </div>
+        </div>
+    </div>
+    <div class="layui-row">
+        <div class="layui-col-md6">
+            <div class="layui-form-item">
+                <label class="layui-form-label">开始时间</label>
+                <div class="layui-input-block">
+                    <input class="layui-input test-item" autocomplete="off" id="txtStartTime"  placeholder="选择开始时间" type="text" />
+
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-md6">
+            <div class="layui-form-item">
+                <label class="layui-form-label">结束时间</label>
+                <div class="layui-input-block">
+                    <input class="layui-input test-item" autocomplete="off"  id="txtEndTime"  placeholder="选择结束时间" type="text" />
+
+                </div>
+            </div>
+        </div>
+    </div>
+        <div class="layui-row">
+            <div class="layui-col-md12">
+                <div class="layui-form-item">
+                    <div class="layui-input-block btnright">
+
+                        <input type="button" name="btn_Click2" value="搜索" id="btn_Click2" class="layui-btn layui-btn-normal" />
+                        <a class="layui-btn layui-btn-primary" onclick="IsReset()">重置</a>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="clear"></div>
+
+    </div>
+<table class="layui-hide" id="list" lay-filter="list"></table>
+<script type="text/javascript" src="../js/jquery.js"></script>
+<script type="text/javascript" src="../js/jquery.ztree.all.min.js"></script>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">修改</a>
+    <a class="layui-btn layui-btn-xs layui-btn-danger layui-hide" lay-event="del">删除</a>
+    </script>
+<script src="../webjars/layui/layui.js" charset="utf-8"></script>
+<script>
+    layui.use(['table','laydate'], function(){
+        var table = layui.table;
+        var $ = layui.jquery;
+        var laydate = layui.laydate;
+        table.render({
+            elem: '#list'
+            //,url:'../configuration/findAllWebConfig'
+            ,url:'../configuration/findAllWebConfigList'
+            // ,toolbar: '#toolbarDemo'
+            ,title: '配置项列表'
+            // 如果使用了thymeleaf，则这个地方的两个方括号需要换行
+            ,cols: [
+                [
+                 {type:'numbers', title:'序号',align: 'center', width:50}
+                ,{field:'keyname', title:'KeyName'}
+                ,{field:'value', title:'KeyValue'}
+                ,{field:'describe', title:'配置项描述'}
+                ,{field:'settingtime', title:'设置时间',align: 'center',width:120}
+                ,{fixed: 'right', title:'操作',align: 'center', toolbar: '#barDemo', width:80}
+            ]
+            ]
+            ,page: {
+                layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'] //自定义分页布局
+                //,curr: 5 //设定初始在第 5 页
+                //, groups: 1 //只显示 1 个连续页码
+                //, first: false //不显示首页
+                //, last: false //不显示尾页
+                ,limit:10
+            }
+        });
+
+        //日期
+            laydate.render({
+                elem: '#txtStartTime'
+                ,format:'yyyy-MM-dd'
+                ,type:'date'
+                ,trigger: 'click'
+            });
+            laydate.render({
+                elem: '#txtEndTime'
+                ,format:'yyyy-MM-dd'
+                ,type:'date'
+                ,trigger: 'click'
+            });
+
+//监听行工具事件
+        table.on('tool(list)', function(obj){
+            var data = obj.data;
+            //console.log(obj)
+            var layer = layui.layer;
+            if(obj.event === 'del'){
+                layer.confirm('真的删除行么', function(index){
+                    $.ajax({
+                        url: "../configuration/deleteWebConfig",
+                        data: {id:obj.data.id},
+                        type: "post",
+                        dataType: "json",
+                        success: function (data) {
+                            if (data.count > 0) {
+                                layer.msg(data.msg);
+                                layer.close(index);
+                                window.location.href="../configuration/list.html";
+
+
+                            }
+                        }
+                    })
+                    layer.close(index);
+                });
+            } else if(obj.event === 'edit'){
+                window.location.href="../configuration/edit?id="+obj.data.id;
+            }
+        });
+        $('#btn_Click').on('click', function(){
+            var keyname = $("#keyname").val();
+
+            var optiontype=$("#optiontype").find("option:selected").val();
+            console.log(optiontype);
+            table.reload('list', {
+                //url: '../configuration/findAllWebConfigList'
+                page: {
+                    curr: 1 //重新从第 1 页开始
+                }
+                ,where: {
+                    keyname:keyname,
+                    optiontype:optiontype
+                } //设定异步数据接口的额外参数
+            });
+        });
+        $('#btn_Click2').on('click', function(){
+            var optiontype=$("#optiontype").find("option:selected").val();
+            var keyname = $("#keyname2").val();
+            var value=$("#value").val();
+            var describe=$("#describe").val();
+            var starttime=$("#txtStartTime").val();
+
+            var endtime=$("#txtEndTime").val();
+
+            table.reload('list', {
+                //url: '../configuration/findAllWebConfigList'
+                page: {
+                    curr: 1 //重新从第 1 页开始
+                }
+                ,where: {
+                    optiontype:optiontype,
+                    keyname:keyname,
+                    value:value,
+                    describe:describe,
+                    settingstarttime:starttime,
+                    settingendtime:endtime
+                } //设定异步数据接口的额外参数
+            });
+        });
+        //高级搜索 展开/收缩
+        $(".querysearch").click(function () {
+            if ($("#HDform").val() == "show") {
+                $("#HDform").val("hide")
+                $(".layui-form.Inhidden").hide();
+            }
+            else {
+                $("#HDform").val("show")
+                $(".layui-form.Inhidden").show();
+            }
+
+        })
+
+        if ($("#HDform").val() == "show") {
+            $(".layui-form.Inhidden").show();
+        }
+        else {
+            $(".layui-form.Inhidden").hide();
+        }
+
+    });
+    function IsReset() {
+        $("#Senior_Search input[type='text']").val("")
+    }
+</script>
+</body>
+</html>

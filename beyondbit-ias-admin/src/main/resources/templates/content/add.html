@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="utf-8">
+    <title>信息管理-信息发布</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../webjars/layui/css/layui.css" media="all">
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+</head>
+<style>
+    body {
+        padding: 40px;
+    }
+</style>
+
+<body>
+<div class="layui-form" lay-filter="layuiadmin-form" id="layuiadmin-form">
+    <div class="layui-form-item layui-hide">
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">标题</label>
+        <div class="layui-input-block">
+            <input type="text" name="title" id="title" lay-verify="required" placeholder="请输入标题" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">所属栏目</label>
+            <div class="layui-input-inline" style="width:350px;">
+                <input type="text" name="subjectNameList" id="subjectNameList" readonly="readonly" class="layui-input" th:value="${subjectNameList}">
+            </div>
+            <div class="layui-inline">
+                <input type="button" id="subjectSelector" name="subjectSelector" class="layui-btn group-select layui-btn-sm" style="margin-top:5px;"
+                       value="选择所属栏目" />
+                <input type="hidden" name="subjectUUIDList" id="subjectUUIDList" th:value="${subjectUUIDList}" />
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">副标题</label>
+        <div class="layui-input-block">
+            <input type="text" name="subTitle" id="subTitle" class="layui-input" autocomplete="off">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">摘要</label>
+        <div class="layui-input-block">
+            <textarea name="abstract" id="abstract" placeholder="请输入摘要" class="layui-textarea" autocomplete="off"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">关键字</label>
+        <div class="layui-input-block">
+            <input type="text" name="keyWords" id="keyWords" class="layui-input" autocomplete="off">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">超链接</label>
+        <div class="layui-input-block">
+            <input type="text" name="url" id="url" class="layui-input" autocomplete="off">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">来源</label>
+        <div class="layui-input-block">
+            <input type="text" name="source" id="source" class="layui-input" autocomplete="off">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">发布时间</label>
+        <div class="layui-input-inline">
+            <input type="text" class="layui-input" id="startTime" name="startTime" lay-verify="startTime" placeholder="开始时间">
+        </div>
+        <div class="layui-input-inline">
+            <input type="text" class="layui-input" id="endTime" name="endTime" lay-verify="endTime" placeholder="结束时间">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">内容</label>
+        <div class="layui-input-block">
+            <input type="hidden" id="content" name="content">
+            <!-- 加载编辑器的容器 -->
+            <script id="contentEditor" name="contentEditor" type="text/plain"></script>
+
+
+
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">是否显示</label>
+        <div class="layui-input-block">
+            <input type="radio" name="isVisible" value="1" title="是" checked="">
+            <input type="radio" name="isVisible" value="0" title="否">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">附件</label>
+        <div class="layui-input-block">
+            <button class="layui-btn" id="btnAttachmentManagement">附件管理</button>
+            <input type="hidden" id="uploadFiles" name="uploadFiles" value="">
+        </div>
+    </div>
+    <div class="layui-form-item" style="text-align:center;">
+        <button class="layui-btn" lay-submit lay-filter="btnSubmit" id="btnSubmit">发布</button>
+    </div>
+</div>
+
+<script type="text/javascript" src="../webjars/jquery/jquery.min.js"></script>
+<script src="../webjars/layui/layui.js" charset="utf-8"></script>
+<script th:src="@{/ueditor/ueditor.config.js}" charset="utf-8" th:inline="none"></script>
+<script th:src="@{/ueditor/ueditor.all.js}" charset="utf-8" th:inline="none"></script>
+<script th:src="@{/ueditor/lang/zh-cn/zh-cn.js}" charset="utf-8" th:inline="none"></script>
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+
+<script>
+
+    layui.use(['form', 'layedit', 'layer', 'upload','laydate'], function () {
+        var form = layui.form
+            , layer = layui.layer
+            , layedit = layui.layedit
+            , laydate = layui.laydate;
+
+        var $ = layui.jquery;
+
+        laydate.render({
+            elem: '#startTime',type: 'datetime'
+        });
+        laydate.render({
+            elem: '#endTime',type: 'datetime'
+        });
+
+        //选择所属栏目
+        $("#subjectSelector").bind("click",function(){
+            var subjectUUIDList=$("#subjectUUIDList").val();
+            var url="../subject/getSubjectSelector?selectedSubjectUUIDList="+subjectUUIDList;
+
+            layui.use(['layer'], function () {
+                var layer = layui.layer;
+                layer.open({
+                    type: 2,
+                    title: "选择所属栏目",
+                    shadeClose: false,
+                    shade: 0.6,
+                    area: ['380px', '100%'],
+                    content: url,
+                    btn: ['选择','重置', '取消'],
+                    yes: function (index, layero) {
+                        // 调用子页面返回值函数
+                        var nodes = $(layero).find("iframe")[0].contentWindow.returnData();
+                        var idList = "";
+                        var nameList = "";
+                        for(var i = 0;i<nodes.length;i++){
+                            if(i==0){
+                                idList = nodes[i].id;
+                                nameList = nodes[i].name;
+                            }
+                            else{
+                                idList += "," + nodes[i].id;
+                                nameList += "," + nodes[i].name;
+                            }
+                        }
+                        $("#subjectNameList").val(nameList);
+                        $("#subjectUUIDList").val(idList);
+                        layer.close(index);
+
+                    },
+                    btn1: function (index, layero) {
+
+                        layer.close(index);
+                    },
+                    btn2: function (index, layero) {
+
+                        layer.close(index);
+                    }
+                });
+            })
+        });
+
+        <!-- 实例化编辑器 -->
+        var contentEditor = UE.getEditor('contentEditor');
+        //获取纯文本内容，返回: hello
+        contentEditor.ready(function () {
+            contentEditor.setHeight(200);
+        });
+
+        form.on("submit(btnSubmit)",function(data){
+
+            $("#content").val(UE.getEditor('contentEditor').getContent());
+            console.log(data.field);
+
+            data.field.content = UE.getEditor('contentEditor').getContent();
+            $.ajax({
+                url:"../content/publish",
+                type:"POST",
+                data:data.field,
+                success:function(res){
+                    if(res.count>0){
+                        layer.msg("发布成功");
+
+                        var returnUrl = "../content/list?subjectUUID="+$("#subjectUUIDList").val().split(',')[0]+"&subjectName="+$("#subjectNameList").val().split(',')[0];
+                        parent.window.location.href= returnUrl;
+                        parent.layer.close(index);
+                    }
+                    else{
+                        layer.msg(data.msg);
+                        return false;
+                    }
+                }
+            });
+
+            return false;
+        });
+    });
+
+    $(function(){
+        $("#btnAttachmentManagement").bind("click",function(){
+
+            layer.open({
+              type: 2
+              ,title:"附件管理"
+              ,area: ['900px', '500px']
+              ,content: '../attachment/manage?uploadFiles='+$("#uploadFiles").val()
+              ,btnAlign: 'c'
+              ,btn: ['保存', '取消']
+              ,yes: function(index, layero){
+                    var uploadFiles = $(layero).find("iframe")[0].contentWindow.getUploadFiles();
+                    $("#uploadFiles").val(uploadFiles);
+                    var uploadFilesLength = $(layero).find("iframe")[0].contentWindow.getUploadFilesLength();
+                    $("#btnAttachmentManagement").text("附件管理"+"("+uploadFilesLength+")");
+                    layer.close(index)
+              }
+              ,btn2: function(index, layero){
+                //按钮【按钮二】的回调
+                //return false 开启该代码可禁止点击该按钮关闭
+              }
+              ,cancel: function(){
+                //右上角关闭回调
+                //return false 开启该代码可禁止点击该按钮关闭
+              }
+            });
+        });
+    });
+</script>
+
+</body>
+
+</html>

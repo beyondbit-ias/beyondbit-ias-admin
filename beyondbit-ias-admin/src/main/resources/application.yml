@@ -1,0 +1,4 @@
+spring:
+  profiles:
+    #配置 用户授权  buasso 使用研发  default 使用ias自带
+    active: default

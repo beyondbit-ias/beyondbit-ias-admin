@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8' />
+    <link href='../js/FullCalendar/core/main.css' rel='stylesheet' />
+    <link href='../js/FullCalendar/daygrid/main.css' rel='stylesheet' />
+    <script src='../js/FullCalendar/core/main.js'></script>
+    <script src='../js/FullCalendar/interaction/main.js'></script>
+    <script src='../js/FullCalendar/daygrid/main.js'></script>
+    <script src='../js/FullCalendar/resource-common/main.js'></script>
+    <script src='../js/FullCalendar/core/locales-all.js'></script>
+    <script src="../webjars/layui/layui.js" charset="utf-8"></script>
+    <script src="../js/jquery.js"></script>
+    <title>两会办理节假日管理</title>
+    <script>
+
+
+        function setcolor(workdays,weekends)
+        {
+            document.querySelectorAll(".fc-day-top").forEach(function(item) {
+
+                if (workdays.length > 0 && workdays.indexOf(item.getAttribute("data-date")) > -1) {
+                    item.setAttribute("style", "color:#3271ee");
+                }
+
+
+                if (weekends.length > 0 && weekends.indexOf(item.getAttribute("data-date")) > -1) {
+
+                    item.setAttribute("style", "color:#db206b");
+                }
+            })
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            var calendarEl = document.getElementById('calendar');
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                plugins: ['interaction', 'dayGrid'],
+                selectable: true,
+                aspectRatio: 2,
+                firstDay:1,
+
+                weekMode:'liquid',
+                header: {
+                    left: 'today prev,next',
+                    center: 'title',
+                    right: 'prevYear,nextYear'
+                },
+                locale: 'zh-cn',
+
+                buttonText: {
+
+                    prev: '<上一月',
+                    next: '下一月>',
+                    prevYear: '<<上一年',
+                    nextYear: '下一年>>'
+                },
+
+                select: function(arg) {
+
+                    console.log(
+                        'select callback',
+                        arg.startStr,
+                        arg.endStr,
+                        arg.resource ? arg.resource.id : '(no resource)'
+                    );
+                    let starttime=arg.startStr;
+                    let endtime= arg.endStr;
+                    let workdays=[];
+                    let weekends=[];
+
+                    layui.use('layer', function() {
+                        var $ = layui.jquery, layer = layui.layer;
+                        layer.open({
+                            content:'请选择设置操作',
+                            time: 20000, //20s后自动关闭
+                            btn: ['设为工作日', '设为节假日']
+                            , btn1: function (index, layero) {
+                                //按钮【按钮】的回调
+                                console.log(starttime, endtime);
+                                $.getJSON("../vacation/insert",{t:new Date().getTime(),type:1,starttime:starttime,endtime:endtime})
+                                    .then(function(res){
+                                        console.log(res);
+                                        layer.close(index);
+
+                                        res.forEach(function(item){
+                                            workdays.push(item.specifiedday);
+                                        })
+                                        setcolor(workdays,weekends);
+                                    });
+
+                            }
+                            , btn2: function (index, layero) {
+                                $.getJSON("../vacation/insert",{t:new Date().getTime(),type:0,starttime:starttime,endtime:endtime})
+                                    .then(function(res){
+                                        console.log(res);
+                                        layer.close(index);
+
+                                        res.forEach(function(item){
+                                            weekends.push(item.specifiedday);
+                                        })
+                                        setcolor(workdays,weekends);
+                                    });
+                            }
+                        });
+                    });
+                },
+            });
+            calendar.render();
+
+            $(function(){
+                var workdays=[];
+                var weekends=[];
+                var currentMonth=new Date().getMonth()+1;
+                var currentYear=new Date().getFullYear();
+
+
+                query(currentMonth,currentYear);
+
+                $('.fc-next-button').on('click', function () {
+                    currentMonth++;
+                    query(currentMonth,currentYear);
+                });
+                $('.fc-prev-button').on('click', function () {
+                    currentMonth--;
+                    query(currentMonth,currentYear);
+                });
+
+                $('.fc-nextYear-button').on('click', function () {
+                    currentYear++;
+                    query(currentMonth,currentYear);
+                });
+
+                $('.fc-prevYear-button').on('click', function () {
+                    currentYear--;
+                    query(currentMonth,currentYear);
+                });
+                $('.fc-today-button').on('click',function(){
+                    currentMonth=new Date().getMonth()+1;
+                    currentYear=new Date().getFullYear();
+                    query(currentMonth,currentYear);
+                })
+
+                function query( month,year)
+                {
+                    console.log(month,year);
+                    $.getJSON("../vacation/query", {t: new Date().getTime(), month: month,year:year})
+                        .then(function(res) {
+                            console.log(res);
+
+                            res.forEach(function(item){
+
+                                if (item.type === 1)
+                                    workdays.push(item.specifiedday);
+                                else
+                                    weekends.push(item.specifiedday);
+                            })
+                            /*document.querySelectorAll(".fc-day-top").forEach((item) => {
+
+                                if (workdays.length > 0 && workdays.indexOf(item.getAttribute("data-date")) > -1) {
+                                    item.setAttribute("style", "color:#3271ee");
+                                }
+
+                                if (weekends.length > 0 && weekends.indexOf(item.getAttribute("data-date")) > -1) {
+
+                                    item.setAttribute("style", "color:#db206b");
+                                }
+                            })*/
+                            setcolor(workdays,weekends);
+                        })
+                }
+            })
+
+        });
+
+
+    </script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+            font-size: 14px;
+        }
+        #calendar {
+            max-width: 900px;
+            margin: 20px auto;
+        }
+    </style>
+
+</head>
+
+<body>
+<div id='calendar'></div>
+</body>
+
+</html>

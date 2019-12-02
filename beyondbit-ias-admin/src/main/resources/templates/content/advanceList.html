@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>信息查询列表</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../webjars/layui/css/layui.css"  media="all">
+    <link rel="stylesheet" href="../font/iconfont.css">
+    <style>
+        body{
+            padding: 15px;
+        }
+
+        .leftMenu{
+            border:1px solid #efefef;margin:10px 0;
+        }
+        .layui-elem-quote{padding:10px;line-height:32px;}
+        .layui-table, .layui-table-view{margin:0;}
+        .iconfont{color:#89b3ff;}
+
+        .searchlist {
+            float: left;
+        }
+        .searchlist > input {
+            display: inline-block;
+            float: left;
+            min-width: 100px;
+            width: auto;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .searchlist > input {
+            display: inline-block;
+            float: left;
+            min-width: 100px;
+            width: auto;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        a.a_search {
+            padding: 0 10px;
+            color: #1e9fff;
+            line-height: 38px;
+            cursor: pointer;
+        }
+
+        .searchlist > a {
+            display: inline-block;
+            float: left;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+
+        .searchlist {
+            float: left;
+        }
+
+        div.btnlist {
+            float: right;
+        }
+
+        .btnlist > .layui-btn {
+            height: 32px;
+            line-height: 32px;
+        }
+
+        .clear {
+            clear: both;
+        }
+    </style>
+</head>
+<body>
+
+<div>
+    <div class="layui-row layui-col-space10">
+        <div class="layui-col-md12 layui-col-sm12">
+            <blockquote class="layui-elem-quote smalllist">
+                <div class="searchlist  layui-form">
+                    <input type="text" name="txtTitle" id="txtTitle" class="layui-input" placeholder="标题" autocomplete="off">
+                    <input type="button" name="btnQuery" value="搜索" id="btnQuery" class="layui-btn layui-btn-normal">
+                    <a class="a_search" href="javascript:void(0);" id="btnAdvance">高级搜索</a>
+                </div>
+                <div id="searchorlist" class="searchlist  layui-form"></div>
+                <div class="btnlist" id="divPublish">
+                    <a href="#" id="btnAdd" class="layui-btn layui-btn-normal layui-hide">新增</a>
+                </div>
+                <div class="clear">
+                </div>
+            </blockquote>
+            <div id="advanceArea" class="layui-form" action="" style="height:auto;height: auto;
+display: none;background: rgb(242, 242, 242);padding: 15px 20px 1px;margin-bottom: 10px;">
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">标题</label>
+                        <div class="layui-input-inline">
+                            <input name="txtTitle2" type="text" id="txtTitle2" autocomplete="off" class="layui-input" placeholder="标题">
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <label class="layui-form-label">所属栏目</label>
+                        <div class="layui-input-inline" style="width:350px;">
+                            <input type="text" name="txtSubjectNameList" id="txtSubjectNameList" readonly="readonly" class="layui-input">
+                        </div>
+                        <div class="layui-inline">
+                            <input type="button" id="subjectSelector" name="subjectSelector" class="layui-btn group-select layui-btn-sm" style="margin-top:5px;"
+                                   value="选择所属栏目" />
+                            <input type="hidden" name="txtSubjectUUIDList" id="txtSubjectUUIDList" />
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">关键字</label>
+                        <div class="layui-input-inline">
+                            <input name="txtKeyWords" type="text" id="txtKeyWords" autocomplete="off" class="layui-input" placeholder="关键字">
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <label class="layui-form-label">发布时间</label>
+                        <div class="layui-input-inline">
+                            <input type="text" class="layui-input" id="startTime" name="startTime" lay-verify="startTime" placeholder="开始时间">
+                        </div>
+                        <div class="layui-input-inline">
+                            <input type="text" class="layui-input" id="endTime" name="endTime" lay-verify="endTime" placeholder="结束时间">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <div class="layui-input-block" style="text-align:right">
+                        <a name="btnAdvanceQuery" id="btnAdvanceQuery" class="layui-btn layui-btn-normal" href="javascript:void(0);">查询</a>
+                        <a class="layui-btn layui-btn-primary" href="javascript:void(0);" id="btnReset">重置</a>
+
+                    </div>
+                </div>
+
+                <div class="clear"></div>
+            </div>
+            <table id="table" lay-filter="table"></table>
+        </div>
+    </div>
+</div>
+
+<script type="text/html" id="titleTpl">
+    <span title="{{d.title}}">{{d.title}}</span>
+</script>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">修改</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+
+<script src="../webjars/layui/layui.js" charset="utf-8"></script>
+<script type="text/javascript" src="../webjars/jquery/jquery.min.js"></script>
+<link rel="stylesheet" href="../webjars/zTree/css/zTreeStyle/zTreeStyle.css" media="all">
+<script type="text/javascript" src="../webjars/zTree/js/jquery.ztree.core.js"></script>
+<script type="text/javascript" src="../webjars/zTree/js/jquery.ztree.excheck.js"></script>
+<script type="text/javascript" src="../webjars/zTree/js/jquery.ztree.exedit.js"></script>
+
+<style>
+    .ztree * {
+        font-size:14px;
+    }
+    .ztree li{
+        line-height:25px;
+    }
+    .ztree li span{
+        line-height:25px;
+    }
+</style>
+<script th:inline="none">
+  //给ztree外部调用
+    layui.define(['table'],function(exports){
+        exports("reload",function(queryType){
+            var table = layui.table;
+
+            if(queryType=="common"){
+                //执行重载
+                table.reload('table', {
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                    ,where: {
+                        "title":$("#txtTitle").val(),
+                        "t":Math.random()
+                    }
+                }, 'data');
+            }
+            else if(queryType=="advance"){
+                //执行重载
+                table.reload('table', {
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                    ,where: {
+                        "title":$("#txtTitle2").val(),
+                        "subjectUUIDList":$("#txtSubjectUUIDList").val(),
+                        "keyWords":$("#txtKeyWords").val(),
+                        "startTime":$("#startTime").val(),
+                        "endTime":$("#endTime").val(),
+                        "t":Math.random()
+                    }
+                }, 'data');
+            }
+
+        })
+    });
+
+    layui.use(['table', 'form', 'laypage','laydate'], function () {
+        var table = layui.table;
+        var form = layui.form;
+        var laypage = layui.laypage;
+        var laydate = layui.laydate;
+
+        laydate.render({
+            elem: '#startTime',type: 'datetime'
+        });
+        laydate.render({
+            elem: '#endTime',type: 'datetime'
+        });
+
+        //选择所属栏目
+        $("#subjectSelector").bind("click",function(){
+            var subjectUUIDList=$("#txtSubjectUUIDList").val();
+            var url="../subject/getSubjectSelector?selectedSubjectUUIDList="+subjectUUIDList;
+
+            layui.use(['layer'], function () {
+                var layer = layui.layer;
+                layer.open({
+                    type: 2,
+                    title: "选择所属栏目",
+                    shadeClose: false,
+                    shade: 0.6,
+                    area: ['380px', '100%'],
+                    content: url,
+                    btn: ['选择','重置','取消'],
+                    yes: function (index, layero) {
+                        // 调用子页面返回值函数
+                        var nodes = $(layero).find("iframe")[0].contentWindow.returnData();
+                        var idList = "";
+                        var nameList = "";
+                        for(var i = 0;i<nodes.length;i++){
+                            if(i==0){
+                                idList = nodes[i].id;
+                                nameList = nodes[i].name;
+                            }
+                            else{
+                                idList += "," + nodes[i].id;
+                                nameList += "," + nodes[i].name;
+                            }
+                        }
+                        $("#txtSubjectNameList").val(nameList);
+                        $("#txtSubjectUUIDList").val(idList);
+                        layer.close(index);
+
+                    },
+                    btn2: function (index, layero) {
+                        $(layero).find("iframe")[0].contentWindow.resetSelected();
+                        return false; //开启该代码可禁止点击该按钮关闭
+                    },
+                    btn3: function (index, layero) {
+                        layer.close(index);
+                    }
+                });
+            })
+        });
+
+
+
+        //方法级渲染
+        table.render({
+            elem: '#table'
+            ,url: '../content/queryPageList'
+            ,where: {
+                "title":$("#txtTitle").val(),
+                "t":Math.random()
+            }
+            ,cols: [[{type:'numbers', title: '序号', width:50, fixed: true}
+                ,{field:'title', title: '标题',templet: '#titleTpl',style:'cursor: pointer;'}
+                ,{field:'subjectName', title: '所属栏目', width:200}
+                ,{field:'isVisible', title: '前台显示', width:90}
+                ,{field:'author', title: '发布人', width:120}
+                ,{field:'createTime', title: '发布时间', width:160}
+                ,{fixed: 'right',title:'操作', width:120, align:'center', toolbar: '#barDemo',align:'center'}
+            ]]
+            ,id: 'table'
+            ,page: {
+                layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'] //自定义分页布局
+                //,curr: 5 //设定初始在第 5 页
+                //, groups: 1 //只显示 1 个连续页码
+                //, first: false //不显示首页
+                //, last: false //不显示尾页
+                ,limit:10
+            }
+        });
+
+        //监听工具条
+        table.on('tool(table)', function (obj) {
+            var data = obj.data;
+            //监听工具条
+
+            if (obj.event === 'del') {
+                layer.confirm('确认删除？', {
+                  btn: ['确认', '取消']
+                  ,btn3: function(index, layero){
+                    layer.close(index);
+                  }
+                }, function(index, layero){
+                    $.ajax({
+                        url: "../content/delete",
+                        data: {
+                            "contentUUID":data.contentUUID,
+                            "subjectUUID":data.subjectUUID,
+                            "t":Math.random()
+                        },
+                        success: function (res) {
+                            if(res.count>0){
+                                layer.msg("删除成功！");
+                                layui.reload();
+                            }else{
+                                layer.msg("删除失败！"+res.msg);
+                            }
+                        }
+                    });
+                });
+
+            } else if (obj.event === 'edit') {
+                //layer.msg('ID：'+ data.id + ' 的查看操作');
+
+                var url="../content/edit?subjectUUID="+data.subjectUUID+"&contentUUID="+data.contentUUID;
+                layer.open({
+                    type: 2,
+                    title: '信息发布修改',
+                    shadeClose: true,
+                    shade: 0.8,
+                    area: ['100%', '100%'],
+                    content: url
+                });
+            }
+        });
+
+
+    });
+
+    $(function(){
+        $("#btnAdvance").click(function () {
+            if ($("#advanceArea").css("display") == "none") {
+                $("#advanceArea").slideDown();
+            } else {
+                $("#advanceArea").slideUp();
+            }
+        });
+
+        $("#btnReset").bind("click",function(){
+            $("#txtTitle").val("");
+            $("#txtTitle2").val("");
+            $("#txtSubjectUUIDList").val("");
+            $("#txtSubjectNameList").val("");
+            $("#txtKeyWords").val("");
+            $("#startTime").val("");
+            $("#endTime").val("");
+            form.render();
+        });
+
+        $("#btnQuery").bind("click",function(){
+            layui.reload("common");
+        });
+
+        $("#btnAdvanceQuery").bind("click",function(){
+            layui.reload("advance");
+        });
+    });
+
+
+</script>
+
+</body>
+</html>

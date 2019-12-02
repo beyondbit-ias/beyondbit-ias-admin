@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="common::commonHeader(新增问卷调查)"></head>
+<style>
+
+    h2{text-align:center;
+        padding: 20px 5px 30px;}
+
+    h2 span{color:red;}
+    h5{line-height:1.8em;font-size:0.8em;}
+    .bottmBorder{border-bottom:1px solid #b1c9d9;}
+
+    .graybackground{background-color:#f1f2f7}
+    .leftbox{
+        background-color:#FFFFFF;right:530px; position:fixed;top:80px;bottom:15px;left:15px;overflow-y: auto;padding:0 0 15px 0
+    }
+    .rightbox{background-color:#fff;width: 500px; right:15px; position:fixed;top:80px;bottom:15px;border:1px solid #eeeff1;/*box-shadow:0 0 10px #888*/}
+    .topicBox{padding:10px;min-height:35px;position:relative;
+        cursor: pointer;}
+    .border{border:1px solid #88A3B7;}
+    .topicname{font-size:13px;font-weight:600;line-height:35px;}
+    .btnBar{padding-top:20px;text-align:center;}
+    .layui-textarea{min-height:50px;}
+    .topicBox .layui-form-checkbox{margin:5px 0;}
+    @media(max-width:480px)
+    {
+        .topicBox .layui-form-checkbox{ min-width:300px;}
+    }
+    .form{padding:5%;border:1px solid #b1c9d9;min-height:500px;}
+    .layui-form-radio{margin:6px 10px 7px 0;color:#666;}
+    .basicinfo{padding-top:20px;}
+     .basicinfo .layui-input{border:none;border-bottom:1px solid #ddd;}
+
+</style>
+<body>
+<div class="whitebg pd10">
+    <div class="layui-form" lay-filter="testform">
+
+        <script id="demo" type="text/html">
+            <div class="topicBox bottmBorder">
+                <h2>{{d.testname}}
+                {{# if(d.teststatus===3){ }}
+                    <span>(已结束)</span>
+                    {{# } }}
+                </h2>
+                <h5>{{d.description}}</h5>
+
+            </div>
+
+            <!--基本信息-->
+            <div class="basicBox" th:insert="commentonline/fragment :: basicinfo"></div>
+
+
+            {{#  layui.each(d.topics, function(index, topic){ }}
+            <div class="topicBox" id="{{topic.id}}" ismustanswer="{{topic.ismustanswer}}">
+
+                <div class="topicname">
+                    {{#  if(topic.ismustanswer==1 ){ }}
+                    <span style="color:red">*</span>
+                    {{# } }}
+                    {{ topic.name }}</div>
+                {{#  if(topic.keys.length>0 && topic.type === 1 ){ }}
+
+                    {{#  layui.each(topic.keys, function(index, item){ }}
+                    <input type="checkbox" name="{{item.topicid}}" isrightkey="{{item.isrightkey}}" keyid="{{item.id}}"  colnumber="{{topic.colnumber}}" lay-skin="primary" title="{{item.content}}">
+
+                    {{#  }); }}
+
+                    <!--允许其他答案-->
+                    {{# if(topic.isallowotherkey==1){ }}
+                    <div class="otheranswer">
+                        <input type="checkbox" name="{{topic.id}}" colnumber="0"  keyid="0" lay-skin="primary" title="{{topic.allowotherkeyname}}">
+                        <input type="text" name="{{topic.id}}" style="display:none;"/>
+                    </div>
+                    {{# } }}
+
+                {{# }else if(  topic.keys.length>0 && topic.type===2 ){ }}
+                    {{#  layui.each(topic.keys, function(index, item){ }}
+                    <input type="radio" name="{{item.topicid}}" keyid="{{item.id}}" isrightkey="{{item.isrightkey}}"  colnumber="{{topic.colnumber}}"  lay-skin="primary" title="{{item.content}}">
+                    {{#  }); }}
+                    <!--允许其他答案-->
+                    {{# if(topic.isallowotherkey==1){ }}
+                    <div class="otheranswer">
+                        <input type="radio" name="{{topic.id}}" keyid="0"  colnumber="0" lay-skin="primary" title="{{topic.allowotherkeyname}}">
+                        <input type="text" name="{{topic.id}}" style="display:none;"/>
+                    </div>
+                    {{# } }}
+                {{# }else if(  topic.type===3 ){ }}
+                <textarea  kind="textarea" class="layui-textarea" name="{{topic.id}}" style="height:{{topic.textareaheight}}px"></textarea>
+
+
+                {{# } }}
+            </div>
+
+            {{#  }); }}
+            {{# var type=GetQueryString("type");}}
+            {{# if(d.teststatus==1 &&(!type || type!="preview")){  }}
+            <div class="btnBar">
+                <button class="layui-btn layui-btn-normal" lay-filter="btnSave" lay-submit="">提交</button>
+
+            </div>
+            {{# } }}
+
+
+        </script>
+<div class="form">
+        <div id="view" class="view"></div>
+
+</div>
+    </div>
+</div>
+
+
+<script src="../webjars/layui/layui.js" charset="utf-8"></script>
+<script type="text/javascript" src="../webjars/jquery/jquery.js"></script>
+<script type="text/javascript" src="../js/commonJs.js"></script>
+<!--搜狐获取ip方法-->
+<script src="http://pv.sohu.com/cityjson?ie=utf-8"></script>
+<script>
+
+    layui.use(['laytpl','form','layer'], function() {
+        var laytpl = layui.laytpl;
+        var layer=layui.layer;
+        var form = layui.form; //select,radio默认隐藏，执行到这一步正常显示
+        $=layui.jquery;
+        //loading
+        var index = layer.load(1, {
+            shade: [0.1,'#fff'] //0.1透明度的白色背景
+        });
+        //声明replys
+        var replies=[];
+
+        var testid=GetQueryString("id");
+        $.ajax({
+            url: "../commentonline/gettopics",
+            data: {'testid': testid},
+            success: function (data) {
+                console.log(data);
+                //第三步：渲染模版
+
+                var getTpl = demo.innerHTML
+                    ,view = document.getElementById('view');
+                laytpl(getTpl).render(data, function(html){
+                    view.innerHTML = html;
+                });
+                form.render();
+
+                $("input[type='checkbox']").each(function(){
+                    var number=$(this).attr("colnumber");
+                    if(number==0) {
+                        //允许其他答案，min-width设置为0
+                        $(this).next(".layui-form-checkbox").css("min-width", "0");
+                    }
+                    else {
+                        var width = 100 / number - 30;
+
+                        $(this).next(".layui-form-checkbox").width(width + '%');
+                    }
+                })
+
+                $("input[type='radio']").each(function(){
+                    var number=$(this).attr("colnumber");
+                    if(number==0) {
+                        //允许其他答案，min-width设置为0
+                        $(this).next(".layui-form-radio").css("min-width", "0");
+                    }
+                    else {
+                        var width = 75 / number;
+                        console.log(number, width);
+                        $(this).next(".layui-form-radio").width(width + '%');
+                    }
+                })
+                layer.closeAll('loading');
+            }
+        })
+
+
+        form.on('checkbox()', function(data){
+            var item=$(data.elem);
+            //console.log(data.elem);
+            var thisTopicid=item.attr("name");
+            var thisKeyid=item.attr("keyid");
+            var thisIsRightKey=item.attr("isrightkey");
+            if(data.elem.checked)
+            {
+                var reply={};
+                reply.topicid=thisTopicid;
+                reply.keyid=thisKeyid;
+                reply.isright=thisIsRightKey;
+                reply.content="";
+                console.log(reply);
+                replies.push(reply);
+            }
+            else
+            {
+                replies.forEach(function(item,index){
+                    if(item.keyid==thisKeyid ||(thisKeyid==0 && item.topicid==thisTopicid))
+                        replies.splice(index, 1);
+
+                })
+            }
+
+            //keyid=0的是允许其他选项的checkbox,勾选后显示next的input
+            if(thisKeyid==0)
+            {
+                if(data.elem.checked)
+                    $(this).next().next().show();
+                else
+                    $(this).next().next().hide();
+            }
+        });
+
+        form.on('radio()', function(data){
+            var item=$(data.elem);
+            var thisTopicid=item.attr("name");
+            var thisKeyid=item.attr("keyid");
+            var thisIsRightKey=item.attr("isrightkey");
+            //radio只能有一个值，所以先移除，后push
+            replies.forEach(function(item,index){
+                if(item.topicid==thisTopicid) {
+                    replies.splice(index,1);
+                }
+            })
+            var reply={};
+            reply.topicid=thisTopicid;
+            reply.keyid=thisKeyid;
+            reply.content="";
+            reply.isright=thisIsRightKey;
+            replies.push(reply);
+
+            if(thisKeyid==0)
+                $(this).next().next().show();
+            else
+                $(this).nextAll(".otheranswer").find("input[type=text]").hide();
+
+
+        });
+
+        //监听提交
+        form.on('submit(btnSave)', function(data){
+            //判断必答题是否都已经写答案
+            //console.log(checkEmpty());
+            if(checkEmpty()==0) {
+                //keyid=0的为允许其他选项的checkbox，把data中topicid相同的值存入content
+                console.log(data, replies);
+                replies.forEach(function (item) {
+                    if (item.keyid == 0) {
+                        var key = item.topicid;
+                        item.content = data.field[key];
+                    }
+                });
+                //data.field中有的，但是replies中没有的，就是textarea问答题的数据
+                var topics = [];
+                replies.forEach(function (item) {
+                    topics.push(item.topicid);
+                })
+
+                for (var key in data.field) {
+                    //console.log(key, data.field[key]);
+                    if (topics.indexOf(key) < 0) {
+                        //console.log($("[name="+key+"]").attr("kind"));
+                        //判断是否是其他选项的input，textarea问答题有kind属性为textarea
+                        if ($("[name=" + key + "]").attr("kind") && $("[name=" + key + "]").attr("kind") == "textarea") {
+                            var reply = {};
+                            reply.topicid = key;
+                            reply.content = data.field[key];
+                            replies.push(reply);
+                        }
+                    }
+                }
+
+                console.log("replies", replies);
+                var ip = returnCitySN["cip"];//用搜狐接口
+
+                $.ajax({
+                    url: "../commentonline/saveReplies",
+                    data: {'replies': JSON.stringify(replies), 'testid': testid, 'ip': ip},
+                    success: function (data) {
+                        console.log(data);
+                        if (data.length > 0) {
+                            layer.msg("提交成功");
+                            setTimeout("window.location.href='" + data + "'", 1500);
+                        } else {
+                            layer.msg("提交失败");
+                            return false;
+                        }
+                    }
+                })
+
+                return false;
+            }
+            else
+            {
+                layer.msg('请检查：1、必答题不能为空；2、如果选择其他选项则必须填写内容；');
+                return false;
+
+            }
+
+
+        });
+
+        function checkEmpty(){
+            var empty=0;
+            $(".topicBox").each(function(){
+                //console.log($(this).attr("id"),$(this).attr("ismustanswer"),$(this).val());
+                if($(this).attr("ismustanswer")==1)
+                {
+                    var topicid=$(this).attr("id");
+
+                    if($("[name="+topicid+"]").attr("kind")&& $("[name="+topicid+"]").attr("kind")=="textarea" )
+                    {
+                        //textarea
+                        if($("[name="+topicid+"]").val().length==0)
+                            empty++;
+                    }//checkbox && radio
+                    else if($("[name='"+topicid+"']:checked").length==0) {
+                        empty++;
+                    }
+
+                }
+
+
+            });
+            //允许其他答案的input是否填写
+            $(".otheranswer").find("input[type=text]").each(function(){
+                console.log($(this).html(),$(this).css("display"),$(this).val().length);
+                if($(this).css("display")!="none" && $(this).val().length==0)
+                    empty++
+            })
+            console.log(empty);
+            return empty;
+        }
+
+    });
+
+</script>
+</body>
+</html>

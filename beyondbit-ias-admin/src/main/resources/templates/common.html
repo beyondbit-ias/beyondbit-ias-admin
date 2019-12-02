@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="commonHeader(title)">
+    <title th:text="${title}"></title>
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../webjars/layui/css/layui.css" media="all">
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+    <link rel="stylesheet" href="../webjars/zTree/css/zTreeStyle/zTreeStyle.css" media="all">
+    <link rel="stylesheet" href="../webjars/zTree/css/zTreeStyle/zTreeStyle.css" media="all">
+<!--    <script type="text/javascript" src="../webjars/zTree/js/jquery.ztree.core.js"></script>-->
+<!--    <script type="text/javascript" src="../webjars/zTree/js/jquery.ztree.excheck.js"></script>-->
+<!--    <script type="text/javascript" src="../webjars/zTree/js/jquery.ztree.exedit.js"></script>-->
+
+    <link rel="stylesheet" href="../css/defaultTheme.css">
+    <style>
+        .layui-elem-quote.smalllist {
+            padding: 10px 15px;
+            min-height: 33px;
+            background: #fff;
+        }
+        .searchlist {
+            float: left;
+        }
+        .searchlist > input {
+            display: inline-block;
+
+            min-width: 100px;
+            width: auto;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        .searchlist > a {
+            display: inline-block;
+
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+        a.a_search {
+            padding: 0 10px;
+            color: #1e9fff;
+            line-height: 38px;
+            cursor: pointer;
+        }
+        div.btnlist {
+            float: right;
+        }
+        .btnlist > .layui-btn {
+            height: 32px;
+            line-height: 32px;
+        }
+
+
+        /*整个页面的body增加背景色结束*/
+        .pd15_20_1 {
+            padding: 15px 20px 1px;
+        }
+
+        .layui-input-block.btnright {
+            margin: 0;
+            text-align: right;
+            float: right;
+        }
+        /*高级检索样式结束*/
+    </style>
+</head>
+<body>
+
+</body>
+</html>

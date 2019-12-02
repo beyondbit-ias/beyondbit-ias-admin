@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.beyondbit.ias.admin.dao.TestMapper">
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.beyondbit.ias.admin.entity.Test">
+    insert into ${dbSchema}ADMIN_COMMENTONLINE_TEST(TESTNAME, TESTSTATUS, CREATETIME, CREATEUSERNAME, FINISHTIME, TESTTYPE, ISNEEDREALNAME, DESCRIPTION, ISPUBLISH, DEPTID, SEQUENCE, CODE, ANSWERFREQUENCY, ANSWEROBJECT, RETURNURL, IPLIMIT, TESTUSERIDS)
+                                                VALUES(#{testname},#{teststatus},#{createtime},#{createusername},#{finishtime},#{testtype},#{isneedrealname},#{description},#{ispublish},#{deptid},#{sequence},#{code},#{answerfrequency},#{answerobject},#{returnurl},#{iplimit},#{testuserids})
+    </insert>
+
+    <update id="update" parameterType="com.beyondbit.ias.admin.entity.Test">
+        update ${dbSchema}ADMIN_COMMENTONLINE_TEST
+        set  TESTNAME = #{testname}, TESTSTATUS = #{teststatus}, CREATETIME = #{createtime}, CREATEUSERNAME = #{createusername}, FINISHTIME = #{finishtime}, TESTTYPE = #{testtype},
+        ISNEEDREALNAME = #{isneedrealname}, DESCRIPTION = #{description}, ISPUBLISH = #{ispublish}, DEPTID = #{deptid}, SEQUENCE = #{sequence}, CODE = #{code},
+         ANSWERFREQUENCY = #{answerfrequency}, ANSWEROBJECT = #{answerobject}, RETURNURL= #{returnurl}, IPLIMIT = #{iplimit}, TESTUSERIDS = #{testuserids} where ID = #{id}
+    </update>
+    <select id="getByID" resultType="com.beyondbit.ias.admin.entity.Test">
+
+    select *
+from ${dbSchema}ADMIN_COMMENTONLINE_TEST
+where ID=#{id}
+</select>
+
+    <select id="getlist" resultType="com.beyondbit.ias.admin.entity.Test">
+        select *
+        from ${dbSchema}ADMIN_COMMENTONLINE_TEST order by SEQUENCE ASC,CREATETIME DESC
+
+    </select>
+    <delete id="delete">
+        delete from ${dbSchema}ADMIN_COMMENTONLINE_TEST where id=#{id}
+    </delete>
+    <update id="updateSequence">
+            update ${dbSchema}ADMIN_COMMENTONLINE_TEST
+            set SEQUENCE=#{sequence}
+            where ID=#{id}
+    </update>
+</mapper>

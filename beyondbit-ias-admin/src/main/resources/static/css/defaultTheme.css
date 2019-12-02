@@ -1,0 +1,9 @@
+/*灰色大底，白色块儿*/
+
+body{background-color:#f1f2f7;padding:15px;}
+.layui-elem-quote{background-color:#fff;}
+.leftMenu{background-color:#fff;border:1px solid #efefef;margin:10px 0;}
+.whitebg{background:#fff;}
+.pd10{padding:10px;}
+.layui-table, .layui-table-view{margin:0;}
+.iconfont{color:#89b3ff;}

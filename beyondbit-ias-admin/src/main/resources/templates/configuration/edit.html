@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="common::commonHeader(配置项修改)"></head>
+<body>
+<div class="whitebg pd10">
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+        <legend>修改配置项</legend>
+    </fieldset>
+    <div action="" class="layui-form">
+        <div class="layui-form-item">
+            <div class="layui-input-inline" id="sitenamediv">
+                <label class="layui-form-label">配置类型</label>
+                <div class="layui-input-block" style="width:400px">
+                    <select id="optiontype" lay-filter="optiontype" runat="server">
+                        <option th:each="item:${dic}" th:text="${item.name}" th:value="${item.name}"></option>
+                        <option href="../dictionary/list?parentid=30">--</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item" th:if="${data.issystemmust}==1">
+            <label class="layui-form-label">系统配置项</label>
+            <div class="layui-input-block">
+                <input checked disabled="" lay-skin="switch" lay-text="是|否" name="switch" type="checkbox">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">KeyName</label>
+            <div class="layui-input-block" style="width:500px;">
+                <input name="id" style="display: none" th:value="${data.id}" type="text"/>
+                <input autocomplete="off" class="layui-input" id="keyname" lay-verify="required" name="keyname"
+                       placeholder="请输入keyname" readonly="readonly" th:value="${data.keyname}" type="text">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">KeyValue</label>
+            <div class="layui-input-block" style="width:500px;">
+                <input autocomplete="off" class="layui-input" id="value" lay-verify="required" name="value"
+                       placeholder="请输入value" th:value="${data.value}" type="text">
+            </div>
+
+        </div>
+
+
+        <div class="layui-form-item">
+
+
+            <label class="layui-form-label">配置项描述</label>
+            <div class="layui-input-block" style="width:500px;">
+                <textarea class="layui-textarea" id="describe" name="describe" placeholder="请输入配置项描述"
+                          th:text="${data.describe}"></textarea>
+            </div>
+
+
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-filter="formDemo" lay-submit>提交</button>
+                <button class="layui-btn layui-btn-danger" lay-filter="formDemo2" lay-submit
+                        th:if="${data.issystemmust}==0">删除
+                </button>
+                <button class="layui-btn layui-btn-primary" id="btnreturn" lay-filter="btnreturn" type="button">返回
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<script charset="utf-8" src="../webjars/layui/layui.js"></script>
+<script>
+    //Demo
+    layui.use('form', function () {
+        var form = layui.form;
+        var layer = layui.layer;
+        var $ = layui.jquery;
+//加载当前配置项的内容
+//         $.ajax({
+//             url:"/webconfig/getWebConfigByID",
+//             data:{id:id},
+//             type: "post",
+//             dataType: "json",
+//             success: function (data) {
+//
+//                 if (data.count > 0) {
+//
+//                     $("#keyname").val(data.data[0].keyname);
+//                     $("#value").val(data.data[0].value);
+//                     $("#describe").val(data.data[0].describe);
+//                 }
+//             }
+//         })
+
+        //修改
+        form.on('submit(formDemo)', function (data) {
+            // layer.msg(JSON.stringify(data.field));
+            // return false;
+            var mydata = data.field;
+
+
+            $.ajax({
+                url: "../configuration/updateWebConfig",
+                data: mydata,
+                type: "post",
+                dataType: "json",
+                success: function (data) {
+                    if (data.count > 0) {
+                        if (data.msg == '当前配置项名称已经存在，请重新输入') {
+                            layer.msg(data.msg);
+                        } else {
+                            layer.msg(data.msg);
+                            setTimeout("window.location.href='../configuration/index'", 1500);
+                        }
+                    }
+                }
+            })
+        });
+        //删除
+        form.on('submit(formDemo2)', function (data) {
+
+            layer.confirm('确定删除该配置项么', function (index) {
+                $.ajax({
+                    url: "../configuration/deleteWebConfig",
+                    data: {Id: data.field.id},
+                    type: "post",
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.count > 0) {
+                            layer.msg(data.msg);
+                            layer.close(index);
+                            setTimeout("window.location.href='../configuration/index'", 1500);
+                        }
+                    }
+                })
+            })
+        });
+
+        //返回
+        $("#btnreturn").click(function () {
+            window.location.href = "../configuration/index";
+        });
+
+        form.on('select(optiontype)', function (data) {
+            if (data.value == "--")
+                window.location.href = "../dictionary/list?parentid=30";
+        });
+    });
+
+    function getQueryString(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) return unescape(r[2]);
+        return null;
+    }
+</script>
+</body>
+</html>

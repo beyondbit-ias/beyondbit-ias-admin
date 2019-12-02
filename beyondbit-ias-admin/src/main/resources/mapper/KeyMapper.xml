@@ -1,0 +1,29 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.beyondbit.ias.admin.dao.KeyMapper">
+    <insert id="insert" parameterType="com.beyondbit.ias.admin.entity.Key">
+
+    insert into ${dbSchema}ADMIN_COMMENTONLINE_KEY(TOPICID, ISRIGHTKEY, STATUS, CONTENT, CREATETIME, CREATORID, SEQUENCE, VALUE, ISDEFAULTKEY)
+    VALUES(#{topicid}, #{isrightkey}, #{status}, #{content}, #{createtime}, #{creatorid}, #{sequence}, #{value}, #{isdefaultkey});
+</insert>
+    <update id="update" parameterType="com.beyondbit.ias.admin.entity.Key">
+
+    update ${dbSchema}ADMIN_COMMENTONLINE_KEY
+    set  ISRIGHTKEY = #{isrightkey}, STATUS = #{status}, CONTENT = #{content}, CREATETIME =#{createtime}, CREATORID = #{creatorid}, SEQUENCE = #{sequence}, VALUE = #{value}, ISDEFAULTKEY = #{isdefaultkey}
+    where ID =#{id}
+</update>
+    <select id="getListByTopicID" resultType="com.beyondbit.ias.admin.entity.Key">
+
+        select *
+from ${dbSchema}ADMIN_COMMENTONLINE_KEY
+    where topicid=#{topicid}
+    order by SEQUENCE ASC,ID ASC
+    </select>
+    <delete id="delete">
+        delete from ${dbSchema}"ADMIN_COMMENTONLINE_KEY" where id=#{id}
+
+    </delete>
+    <delete id="deleteByTopicID">
+        delete from ${dbSchema}"ADMIN_COMMENTONLINE_KEY" where TOPICID=#{topicid}
+
+    </delete>
+</mapper>

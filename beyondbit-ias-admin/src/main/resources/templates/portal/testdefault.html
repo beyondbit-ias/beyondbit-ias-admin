@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>两会办理</title>
+    <link rel="stylesheet" href="../webjars/layui/css/layui.css"  media="all">
+    <style>
+        body {
+            min-width: 520px;
+            padding:10px;
+        }
+
+        .column {
+            width: 50%;
+            float: left;
+            padding-bottom: 100px;
+        }
+
+        .portlet {
+            margin: 0 1em 1em 0;
+            padding: 1em;
+            border: 1px solid #ccc;
+            height: 100px;
+            overflow: hidden;
+
+        }
+
+        .shadow {
+
+            -webkit-box-shadow: 8px 8px 8px #c8c8c8;
+            -moz-box-shadow: 8px 8px 8px #c8c8c8;
+            box-shadow: 8px 8px 8px #c8c8c8;
+        }
+
+
+        .portlet-placeholder {
+            border: 1px solid pink;
+            padding: 1em;
+            margin: 0 1em 1em 0;
+            height: 100px;
+        }
+
+        /*.emptycol{border: 1px solid burlywood;}*/
+        .emptycol .portlet-placeholder {
+            border: 1px solid pink;
+            margin: 0 1em 1em 0;
+            height: 100px;
+        }
+    </style>
+    <script src="../js/jquery-1.12.4.js"></script>
+    <script src="../js/jquery-ui.js"></script>
+
+    <script>
+        $(function () {
+            var clientWidth = document.body.clientWidth;
+            $(".column").sortable({
+                connectWith: ".column",
+                //handle: ".portlet",
+                cancel: ".portlet-toggle",
+                placeholder: "portlet-placeholder ui-corner-all",
+                scroll: false,
+                disabled: true,//默认不可拖动
+                deactivate: function (event, ui) {
+                    //console.log(event,ui);
+                    //console.log(ui.offset.left);
+                },
+                sort: function (event, ui) {
+                    var colnumber = 3 - $(".emptycol").length;
+                    console.log("colnumber", colnumber, ui);
+                    console.log(ui.offset.left > clientWidth / 2, colnumber == 1, colnumber);
+                    if (ui.offset.left > clientWidth / 2 && colnumber == 1) {
+                        console.log(">500");
+
+
+                        $(".column").width("48%");
+                    }
+                    if (ui.offset.left > clientWidth / 3 * 2 && colnumber == 2) {
+                        console.log(">600");
+
+
+                        $(".column").width("33%");
+                    }
+
+
+
+                },
+                start: function (event, ui) {
+                    console.log("start", ui.item.attr("id"));
+
+                },
+                stop: function (event, ui) {
+                    changeColWidth();
+                }
+            });
+
+
+
+
+            function changeColWidth() {
+                var thisColnum = 0;
+                var width = "100%";
+                $(".column").each(function () {
+                    if ($(this).find(".portlet").length > 0) {
+                        thisColnum++;
+                        $(this).removeClass("emptycol");
+                    } else
+                        $(this).addClass("emptycol");
+                })
+                colnum = thisColnum;
+                console.log(colnum);
+                switch (thisColnum) {
+                    case 1:
+                        width = "100%";
+                        break;
+                    case 2:
+                        width = "50%";
+                        break;
+                    case 3:
+                        width = "33%";
+                        break;
+                }
+                $(".column").css("width", width);
+                $(".emptycol").css("width", 0);
+            }
+            $(".column").on("dblclick",".portlet",function () {
+                if ($(".portlet").hasClass("shadow")) {
+                    $(".portlet").removeClass("shadow");
+                    $(".column").sortable("disable");
+                    //save
+                } else {
+                    $(".portlet").addClass("shadow");
+                    $(".column").sortable("enable");
+                }
+                //alert("dblclick");
+            });
+
+            $(".portlet").addClass("ui-corner-all");
+
+
+
+
+        })
+    </script>
+</head>
+
+<body>
+
+<div class="column" id="col1">
+
+    <div class="portlet" id="id3">
+        666Lorem ipsum dolor sit amet, consectetuer adipiscing elitLorem ipsum dolor sit amet, consectetuer adipiscing
+        elit
+    </div>
+    <div class="portlet" id="id4">
+        777Lorem ipsum dolor sit amet, consectetuer adipiscing elitLorem ipsum dolor sit amet, consectetuer adipiscing
+        elit
+    </div>
+    <div class="portlet">
+        888Lorem ipsum dolor sit amet, consectetuer adipiscing elitLorem ipsum dolor sit amet, consectetuer adipiscing
+        elit
+    </div>
+</div>
+
+<div class="column" id="col2">
+    <div class="portlet" id="id3">
+        111Lorem ipsum dolor sit amet, consectetuer adipiscing elitLorem ipsum dolor sit amet, consectetuer adipiscing
+        elit
+    </div>
+    <div class="portlet" id="id4">
+        222Lorem ipsum dolor sit amet, consectetuer adipiscing elitLorem ipsum dolor sit amet, consectetuer adipiscing
+        elit
+    </div>
+    <div class="portlet">
+        333Lorem ipsum dolor sit amet, consectetuer adipiscing elitLorem ipsum dolor sit amet, consectetuer adipiscing
+        elit
+    </div>
+</div>
+
+<div class="column emptycol" id="col3">
+
+
+
+</div>
+
+
+</body>
+</html>
+

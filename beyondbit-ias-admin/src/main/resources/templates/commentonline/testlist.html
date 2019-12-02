@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="common::commonHeader(新增问卷调查)"></head>
+
+<body>
+<div>
+    <div class="layui-row">
+            <blockquote class="layui-elem-quote">
+                评议管理
+                <div id="demoTable" style="width:50%;float:right;text-align:right;">
+                    <input type="button" class="layui-btn layui-btn-normal layui-btn-sm" onclick="openAdd()"
+                           value="新增"/>
+                </div>
+            </blockquote>
+            <table id="table" lay-filter="table"></table>
+        </div>
+
+
+</div>
+<script type="text/html" id="testStatusTpl">
+    {{#  if(d.teststatus==1){  }}
+    已发布
+    {{#  } else if(d.teststatus==2){ }}
+    未发布
+
+    {{# }else{ }}
+    已结束
+    {{# } }}
+</script>
+
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-xs" lay-event="edit" title="修改">
+        <i class="layui-icon">&#xe642;</i>
+    </a>
+    <a class="layui-btn layui-btn-xs" lay-event="view" title="查看">
+        <i class="layui-icon">&#xe6b2;</i>
+    </a>
+    <a class="layui-btn layui-btn-xs" lay-event="analyse" title="分析">
+        <i class="layui-icon">&#xe62c;</i>
+    </a>
+    <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="del" title="删除">
+        <i class="layui-icon">&#xe640;</i>
+    </a>
+
+</script>
+
+
+
+<script src="../webjars/layui/layui.js" charset="utf-8"></script>
+<script type="text/javascript" src="../webjars/jquery/jquery.js"></script>
+
+<script type="text/javascript" src="../js/commonJs.js"></script>
+<script>
+    function openAdd() {
+        window.location.href = "../commentonline/addtest";
+    }
+
+</script>
+
+<script th:inline="none">
+
+    layui.use(['table', 'form', 'laypage'], function () {
+        var table = layui.table;
+        var form = layui.form;
+        var laypage = layui.laypage;
+
+        //方法级渲染
+        table.render({
+            elem: '#table'
+            ,url: '../commentonline/gettestlist'
+            ,cols: [[{type:'numbers', title: '序号', width:50, fixed: true}
+                ,{field:'testname', title: '名称'}
+                ,{field:'createtime', title: '发布时间'}
+                ,{field:'teststatus', title: '状态',templet:'#testStatusTpl',width:90 }
+                ,{field:'sequence', title: '排序', width:70,edit: 'text',sort: true}
+                ,{fixed: 'right',title:'数据操作', width:180, align:'center', toolbar: '#barDemo',align:'center'}
+            ]]
+            ,id: 'table'
+            ,page: {
+                layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'] //自定义分页布局
+                //,curr: 5 //设定初始在第 5 页
+                //, groups: 1 //只显示 1 个连续页码
+                //, first: false //不显示首页
+                //, last: false //不显示尾页
+                ,limit:10
+            }
+        });
+
+        //监听工具条
+        table.on('tool(table)', function (obj) {
+            var data = obj.data;
+            //监听工具条
+
+            if (obj.event === 'del') {
+                layer.confirm('确定删除吗？', function (index) {
+                    $.ajax({
+                        url: "../commentonline/deletetest",
+                        data: data,
+                        success: function (data) {
+                            layer.msg('删除成功');
+                        }
+                    })
+                    obj.del();
+                    layer.close(index);
+                });
+            } else if (obj.event === 'edit') {
+                window.location.href="../commentonline/topicmanager?id="+data.id;
+            }
+            else if(obj.event==='view')
+                window.location.href="../commentonline/replylist?id="+data.id;
+            else if(obj.event==='analyse')
+                window.location.href="../commentonline/analyse?id="+data.id;
+        });
+        //监听单元格编辑，修改排序
+        table.on('edit(table)', function (obj) {
+            var value = obj.value //得到修改后的值
+                , data = obj.data //得到所在行所有键值
+                , field = obj.field; //得到字段
+            $.ajax({
+                url: "../commentonline/updateTestSequence",
+                data: {sequence:data.sequence,id:data.id},
+
+                success: function (data) {
+                    console.log(data);
+                    if (data > 0) {
+                        //layer.msg('排序号更改成功！');
+                    }
+
+                }
+            })
+
+        });
+
+        //监听排序事件
+        table.on('sort(table)', function(obj){ //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+            table.reload('table', {
+                initSort: obj //记录初始排序，如果不设的话，将无法标记表头的排序状态。
+                ,page: {
+                    curr: 1 //重新从第 1 页开始
+                }
+                ,where: {
+                    parentId:$("#parentid").val(),
+                    orderbyClause:obj.field+" "+obj.type
+                }
+            });
+            //layer.msg('服务端排序。order by '+ obj.field + ' ' + obj.type);
+        });
+
+
+    });
+
+
+</script>
+
+</body>
+
+</html>

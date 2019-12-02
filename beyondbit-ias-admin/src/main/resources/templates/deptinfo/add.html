@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>机构列表</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../webjars/layui/css/layui.css" media="all">
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+</head>
+<style>
+    body {
+        padding: 40px;
+    }
+</style>
+
+<body>
+<div class="layui-form" lay-filter="layuiadmin-form" id="layuiadmin-form">
+    <div class="layui-form-item layui-hide">
+        <input readonly  type="text" name="id" id="id" class="layui-input" min="1">
+        <input readonly  type="text" name="guid" id="guid" class="layui-input">
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">编码</label>
+        <div class="layui-input-block">
+            <input type="text" name="deptCode" id="deptCode" lay-verify="required" placeholder="请输入编码" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">名称</label>
+        <div class="layui-input-block">
+            <input type="text" name="deptName" id="deptName" lay-verify="required" placeholder="请输入名称" class="layui-input">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">简称</label>
+        <div class="layui-input-block">
+            <input type="text" name="shortName" id="shortName" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">上级机构</label>
+            <div class="layui-input-inline">
+                <input type="text" name="pname" id="pname" class="layui-input">
+            </div>
+            <div class="layui-inline">
+                <input type="button" class="layui-btn group-select layui-btn-sm" style="margin-top:5px;" onclick="openDicSelector(this)"
+                       value="选择上级机构" />
+                <input type="hidden" name="parentGuid" id="parentGuid" />
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">机构级别</label>
+
+        <div class="layui-input-block">
+            <select name="deptType" lay-filter="deptType">
+                <option value="1">部门</option>
+                <option value="2">单位</option>
+
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">是否停用</label>
+
+        <div class="layui-input-block">
+            <input type="checkbox" name="switchlocked" lay-skin="switch" lay-text="启用|停用" lay-filter="locked" value="0" checked>
+            <input type="hidden" id="locked" name="locked" value="0">
+        </div>
+    </div>
+
+
+
+    <div class="layui-form-item">
+        <label class="layui-form-label"></label>
+        <div class="layui-input-block">
+            <button class="layui-btn" lay-submit lay-filter="btnsubmit" id="btnsubmit">提交</button>
+            <button lay-submit class="layui-btn layui-btn-danger" lay-filter="btndelete" id="btndelete">删除</button>
+            <button style="display:none;" type="button" class="layui-btn layui-btn-primary" lay-filter="btnreturn" id="btnreturn">返回</button>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="../webjars/jquery/jquery.js"></script>
+<script src="../webjars/layui/layui.js" charset="utf-8"></script>
+
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+
+
+
+<script>
+
+
+    //外部调用方法
+    layui.define('form',function(exports){
+        var form=layui.form;
+        exports('selectRender',function(){
+            form.render("select");
+        })
+    })
+    layui.use(['form', 'layedit', 'layer', 'upload','laydate'], function () {
+        var form = layui.form
+            , layer = layui.layer
+            , layedit = layui.layedit
+            , laydate = layui.laydate;
+
+        var $ = layui.jquery;
+
+        var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+
+        //监听提交
+        form.on('submit(btnsubmit)', function(data){
+            console.log(data.field);
+            $.ajax({
+                url: "../deptinfo/save",
+                data: data.field,
+                success: function (data) {
+                    //console.log(data);
+                    if(data.count>0) {
+                        layer.msg("提交成功");
+
+                        var url = "../deptinfo/list?parentGuid=" + $("#parentGuid").val();
+                        parent.window.location.href= url;
+                        parent.layer.close(index);
+                    }
+                    else {
+                        layer.msg(data.msg);
+                        return false;
+                    }
+
+
+                }
+            })
+            return false;
+        });
+        //启用
+        form.on('switch(locked)', function(data){
+            if(data.elem.checked)
+            {
+                $("#locked").val(0);
+            }
+            else
+            {
+                $("#locked").val(1);
+            }
+
+        });
+        //监听删除
+        form.on('submit(btndelete)', function(data){
+            $.ajax({
+                url: "../deptinfo/delete",
+                data: data.field,
+                success: function (data) {
+                    layer.msg("删除成功");
+                    var url = "../deptinfo/list?parentGuid=" + $("#parentGuid").val();
+                    parent.window.location.href= url;
+                    parent.layer.close(index);
+                }
+            })
+            return false;
+        });
+        //返回
+        $("#btnreturn").click(function(){
+
+            parent.window.location.href="../deptinfo/list?parentGuid="+$("#parentGuid").val();
+            parent.layer.close(index);
+        });
+        //编辑
+        if( GetQueryString("guid")!=null &&  GetQueryString("guid")!="") {
+            $.ajax({
+                url: "../deptinfo/getByGuid",
+                data:{"guid": GetQueryString("guid")},
+                success: function (data) {
+                    //console.log(data);
+                    form.val('layuiadmin-form', {
+                        "id": data.id,
+                        "deptCode":data.deptCode,
+                        "shortName":data.shortName,
+                        "deptName":data.deptName,
+                        "deptType": data.deptType,
+                        "parentGuid":data.parentGuid,
+                        "switchlocked":data.locked=="0"?true:false,
+                        "locked":data.locked,
+                        "pname":data.pname
+                    })
+                }
+            })
+            $("#deptCode").attr("ReadOnly","ReadOnly");
+        }
+
+
+        if( GetQueryString("parentGuid")!=null &&  GetQueryString("parentGuid")!="") {//表单初始赋值
+            form.val('layuiadmin-form', {
+                "parentGuid": GetQueryString("parentGuid")
+            })
+
+        }
+
+        if( GetQueryString("pname")!=null &&  GetQueryString("pname")!="") {//表单初始赋值
+            form.val('layuiadmin-form', {
+                "pname":unescape(GetQueryString("pname"))
+            })
+        }
+
+    });
+
+    function GetQueryString(name)
+    {
+        var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+        var r = window.location.search.substr(1).match(reg);
+        if(r!=null)return  unescape(r[2]); return null;
+    }
+
+
+    //选择上级目录点击事件
+    function openDicSelector(obj)
+    {
+        var parentGuid=$("#parentGuid").val();
+        var url="getCommonselector?parentGuid="+parentGuid;
+
+        layui.use(['layer'], function () {
+            var layer = layui.layer;
+            layer.open({
+                type: 2,
+                title: $(obj).val(),
+                shadeClose: false,
+                shade: 0.6,
+                area: ['380px', '100%'],
+                content: url,
+                btn: ['选择','重置', '取消'],
+                yes: function (index, layero) {
+                    // 调用子页面返回值函数
+                    var data=$(layero).find("iframe")[0].contentWindow.returnData();
+
+                    $("#pname").val(data.name);
+                    $("#parentGuid").val(data.id);
+
+
+                    layer.close(index);
+
+                },
+                btn1: function (index, layero) {
+
+                    layer.close(index);
+                },
+                btn2: function (index, layero) {
+
+                    layer.close(index);
+                }
+            });
+        })
+
+    }
+
+    function  parentParams()
+    {
+        return $("input[OpenDialog=1]").val();
+    }
+
+</script>
+
+</body>
+
+</html>

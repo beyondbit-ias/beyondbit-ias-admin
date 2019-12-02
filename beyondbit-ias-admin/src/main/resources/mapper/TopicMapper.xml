@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.beyondbit.ias.admin.dao.TopicMapper">
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id"  parameterType="com.beyondbit.ias.admin.entity.Topic">
+    insert into ${dbSchema}ADMIN_COMMENTONLINE_TOPIC(TESTID, NAME, TYPE, STATUS, CREATETIME, CREATORID, CONTENT, COLNUMBER, ISALLOWOTHERKEY, ISMUSTANSWER, TEXTAREAHEIGHT, TEXTLENGTH, ALLOWOTHERKEYNAME, SEQUENCE)
+                                                    VALUES(#{testid},#{name}, #{type}, #{status}, #{createtime}, #{creatorid}, #{content},#{colnumber}, #{isallowotherkey},#{ismustanswer}, #{textareaheight}, #{textlength}, #{allowotherkeyname}, #{sequence})
+
+</insert>
+    <update id="update" parameterType="com.beyondbit.ias.admin.entity.Topic">
+    update ${dbSchema}ADMIN_COMMENTONLINE_TOPIC
+    set NAME = #{name}, TYPE =#{type}, STATUS = #{status}, CONTENT = #{content}, COLNUMBER = #{colnumber}, ISALLOWOTHERKEY = #{isallowotherkey}, ISMUSTANSWER = #{ismustanswer}, TEXTAREAHEIGHT = #{textareaheight}, TEXTLENGTH = #{textlength}, ALLOWOTHERKEYNAME = #{allowotherkeyname}, SEQUENCE = #{sequence}
+    where ID = #{id}
+
+</update>
+
+    <select id="getListByTestID" resultType="com.beyondbit.ias.admin.entity.Topic">
+        select *
+from ${dbSchema}ADMIN_COMMENTONLINE_TOPIC where TESTID=#{testid} order by SEQUENCE asc,ID asc
+    </select>
+
+    <select id="getByID" resultType="com.beyondbit.ias.admin.entity.Topic">
+        select *
+from ${dbSchema}ADMIN_COMMENTONLINE_TOPIC where ID=#{id}
+    </select>
+
+    <delete id="delete">
+        delete from ${dbSchema}ADMIN_COMMENTONLINE_TOPIC where ID=#{id}
+    </delete>
+
+    <delete id="deleteByTestID">
+        delete from ${dbSchema}ADMIN_COMMENTONLINE_TOPIC where TESTID=#{testid}
+    </delete>
+</mapper>

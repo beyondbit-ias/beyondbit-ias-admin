@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>附件管理</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../webjars/layui/css/layui.css" media="all">
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+    <link rel="stylesheet" type="text/css" th:href="@{/webuploader/css/webuploader.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/webuploader/css/style.css}">
+</head>
+<body>
+<div class="layui-card">
+    <div class="layui-card-header layui-hide">附件管理</div>
+    <div class="layui-card-body">
+        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <ul class="layui-tab-title">
+                <li class="layui-this">文件</li>
+            </ul>
+            <div class="layui-tab-content" style="height: 100px;">
+                <div class="layui-tab-item layui-show">
+                    <div id="btnPicker"></div>
+                    <table class="layui-table" id="attachment" name="attachment">
+                        <colgroup>
+                            <col width="60">
+                            <col width="">
+                            <col width="120">
+                            <col width="100">
+                            <col width="60">
+                        </colgroup>
+                        <thead>
+                        <tr>
+                            <th>序号</th>
+                            <th>文件名</th>
+                            <th>大小</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="item,itemStat:${fileList}">
+                                <td th:text="${itemStat.index + 1}"></td>
+                                <td><a th:href="${'/portal/uploads/' + item.relativePath + item.internalName}" target="_blank" th:text="${item.name}"></a></td>
+                                <td th:text="${#numbers.formatDecimal(item.length/1024.0,0,2)}+'KB'"></td>
+                                <td>已上传</td>
+                                <td>
+                                    <a class="layui-btn layui-btn-xs layui-btn-danger" th:href="'javascript:delCurFile('+${item.id}+');'">删除</a>
+                                    <input type="hidden" name="fileID" th:value="${item.id}">
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" id="hdUploadFiles" name="hdUploadFiles" th:value="${uploadFiles}">
+<input type="hidden" id="hdUploadFilesLength" name="hdUploadFilesLength" th:value="${uploadFilesLength}">
+<script type="text/javascript" src="../webjars/jquery/1.12.4/jquery.min.js"></script>
+<script src="../webjars/layui/layui.js" charset="utf-8"></script>
+<script type="text/javascript" th:src="@{/webuploader/js/webuploader.js}"></script>
+<!--<script type="text/javascript" src="/js/upload.js"></script>-->
+<script type="text/javascript">
+    var getUploadFiles = function(){
+        return $("#hdUploadFiles").val();
+    }
+
+    var getUploadFilesLength = function(){
+        return $("#hdUploadFilesLength").val();
+    }
+
+
+    var $btn = $('#uploadBtn');
+    var $thelist = $("table[name='attachment']").find("tbody");
+    var chunkSize = 5 * 1024 * 1024;
+
+    var getUploadFilesJson = function(){
+        var res = [];
+        var trList = $thelist.find("tr");
+        for(var i = 0;i<trList.length;i++){
+            var tdList = $(trList[i]).find("td");
+            res.push({
+              "rowNo": $(tdList).eq(0).text(),
+              "fileName": $(tdList).eq(1).text(),
+              "fileSize": $(tdList).eq(2).text(),
+              "fileID": $(tdList).eq(4).find("input[type='hidden']").val()
+            });
+        }
+        return res;
+    }
+    // HOOK 这个必须要再uploader实例化前面
+    WebUploader.Uploader.register({
+        'before-send-file': 'beforeSendFile',
+        'before-send': 'beforeSend'
+    }, {
+        beforeSendFile: function (file) {
+            console.log("beforeSendFile");
+            // Deferred对象在钩子回掉函数中经常要用到，用来处理需要等待的异步操作。
+            var task = new $.Deferred();
+            // 根据文件内容来查询MD5
+            uploader.md5File(file).progress(function (percentage) {   // 及时显示进度
+                console.log('计算md5进度:', percentage);
+                getProgressBar(file, percentage, "MD5", "MD5");
+            }).then(function (val) { // 完成
+                console.log('md5 result:', val);
+                file.md5 = val;
+                // 模拟用户id
+                // file.uid = new Date().getTime() + "_" + Math.random() * 100;
+                file.uid = WebUploader.Base.guid();
+                // 进行md5判断
+                $.post("../attachment/checkFileMd5", {uid: file.uid, md5: file.md5},
+                        function (data) {
+                            console.log(data.status);
+                            var status = data.status.value;
+                            task.resolve();
+                            if (status == 101) {
+                                // 文件不存在，那就正常流程
+                            } else if (status == 100) {
+                                // 忽略上传过程，直接标识上传成功；
+                                uploader.skipFile(file);
+                                file.pass = true;
+                            } else if (status == 102) {
+                                // 部分已经上传到服务器了，但是差几个模块。
+                                file.missChunks = data.data;
+                            }
+                        });
+            });
+            return $.when(task);
+        },
+        beforeSend: function (block) {
+            console.log("block")
+            var task = new $.Deferred();
+            var file = block.file;
+            var missChunks = file.missChunks;
+            var blockChunk = block.chunk;
+            console.log("当前分块：" + blockChunk);
+            console.log("missChunks:" + missChunks);
+            if (missChunks !== null && missChunks !== undefined && missChunks !== '') {
+                var flag = true;
+                for (var i = 0; i < missChunks.length; i++) {
+                    if (blockChunk == missChunks[i]) {
+                        console.log(file.name + ":" + blockChunk + ":还没上传，现在上传去吧。");
+                        flag = false;
+                        break;
+                    }
+                }
+                if (flag) {
+                    task.reject();
+                } else {
+                    task.resolve();
+                }
+            } else {
+                task.resolve();
+            }
+            return $.when(task);
+        }
+    });
+
+    // 实例化
+    var uploader = WebUploader.create({
+        pick: {
+            id: '#btnPicker',
+            label: '点击选择文件'
+        },
+        formData: {
+            uid: 0,
+            md5: '',
+            chunkSize: chunkSize
+        },
+        //dnd: '#dndArea',
+        //paste: '#uploader',
+        swf: 'js/Uploader.swf',
+        chunked: true,
+        chunkSize: chunkSize, // 字节 1M分块
+        threads: 1,
+        server: '../attachment/fileUpload',
+        auto: true,
+
+        // 禁掉全局的拖拽功能。这样不会出现图片拖进页面的时候，把图片打开。
+        disableGlobalDnd: true,
+        fileNumLimit: 1024,
+        fileSizeLimit: 1024 * 1024 * 1024,    // 200 M
+        fileSingleSizeLimit: 1024 * 1024 * 1024    // 50 M
+    });
+
+    // 当有文件被添加进队列的时候
+    uploader.on('fileQueued', function (file) {
+        console.log("选择了一个新文件");
+        var rowNo = parseInt($("#hdUploadFilesLength").val()) + 1;
+
+        var strHtml = '<tr>';
+        strHtml += '         <td>'+ rowNo+'</td>';
+        strHtml += '         <td>' + file.name + '</td>';
+        strHtml += '         <td>' + (file.size/1024.0).toFixed(2) + 'KB</td>';
+        strHtml += '         <td></td>';
+        strHtml += '         <td>';
+        strHtml += '             <a name="rowDel" class="layui-btn layui-btn-xs layui-btn-danger" href="#">删除</a>';
+        strHtml += '             <input type="hidden" name="fileID" value="'+file.id+'">';
+        strHtml += '         </td>';
+        strHtml += '   </tr>';
+        $thelist.append(strHtml);
+        $("#hdUploadFilesLength").val(rowNo);
+    });
+
+    //当某个文件的分块在发送前触发，主要用来询问是否要添加附带参数，大文件在开起分片上传的前提下此事件可能会触发多次。
+    uploader.onUploadBeforeSend = function (obj, data) {
+        console.log("onUploadBeforeSend");
+        var file = obj.file;
+        data.md5 = file.md5 || '';
+        data.uid = file.uid;
+    };
+    // 上传中
+    uploader.on('uploadProgress', function (file, percentage) {
+        getProgressBar(file, percentage, "FILE", "上传进度");
+    });
+    // 上传返回结果
+    uploader.on('uploadSuccess', function (file,res) {
+        var currentTr = $thelist.find("input[type='hidden'][name='fileID'][value='"+file.id+"']").parent("td").parent("tr");
+        if(res.success){
+            var text = '已上传';
+            if (file.pass) {
+                text = "已秒传。"
+            }
+            $(currentTr).find('td').eq(1).html("<a href='"+res.fileFullPath+"' target='_blank'>"+file.name+"</a>");
+            $(currentTr).find('td').eq(3).text(text);
+            $(currentTr).find("td").eq(4).find("a[name='rowDel']").attr("href","javascript:delCurFile("+res.fileID+");").next("input[type='hidden'][name='fileID']").val(res.fileID);
+
+            var uploadFiles = $("#hdUploadFiles").val();
+            if(uploadFiles.length==0){
+                uploadFiles = res.fileID;
+            }else{
+                uploadFiles += "," + res.fileID;
+            }
+            $("#hdUploadFiles").val(uploadFiles);
+        }else{
+            $(currentTr).find('td').eq(3).text(res.message);
+        }
+    });
+    uploader.on('uploadError', function (file) {
+        $thelist.find("input[type='hidden'][name='fileID'][value='"+file.id+"']").parent("td").parent("tr").find('td').eq(3).text("上传出错");
+
+    });
+    uploader.on('uploadComplete', function (file) {
+        // 隐藏进度条
+        // fadeOutProgress(file, 'MD5');
+        // fadeOutProgress(file, 'FILE');
+    });
+    // 文件上传
+    $btn.on('click', function () {
+        console.log("上传...");
+        uploader.upload();
+        console.log("上传成功");
+    });
+
+    /**
+     *  生成进度条封装方法
+     * @param file 文件
+     * @param percentage 进度值
+     * @param id_Prefix id前缀
+     * @param titleName 标题名
+     */
+    function getProgressBar(file, percentage, id_Prefix, titleName) {
+        var $progressBar = $thelist.find("input[type='hidden'][name='fileID'][value='"+file.id+"']").parent("td").parent("tr").find('td').eq(3), $percent = $progressBar.find('#' + id_Prefix + '-progress-bar');
+        // 避免重复创建
+        if (!$percent.length) {
+            $percent = $('<div id="' + id_Prefix + '-progress" class="progress progress-striped active">' +
+                    '<div id="' + id_Prefix + '-progress-bar" class="progress-bar" role="progressbar" style="width: 0%">' +
+                    '</div>' +
+                    '</div>'
+            ).appendTo($progressBar).find('#' + id_Prefix + '-progress-bar');
+        }
+        var progressPercentage = percentage * 100 + '%';
+        $percent.css('width', progressPercentage);
+        $percent.html(titleName + ':' + progressPercentage);
+    }
+
+    /**
+     * 隐藏进度条
+     * @param file 文件对象
+     * @param id_Prefix id前缀
+     */
+    function fadeOutProgress(file, id_Prefix) {
+        $('#' + file.id).find('#' + id_Prefix + '-progress').fadeOut();
+    }
+
+    function delCurFile(fileID){
+        console.log(fileID);
+        var uploadFiles = $("#hdUploadFiles").val();
+        var uploadFilesLength = parseInt($("#hdUploadFilesLength").val()) - 1;
+        var arrFileID = uploadFiles.split(',');
+        for(var i=0;i<arrFileID.length;i++){
+            var item = parseInt(arrFileID[i]);
+            if(item!=fileID){
+                continue;
+            }
+
+            if(i==0){
+                if(arrFileID.length==1){
+                    uploadFiles = uploadFiles.replace(fileID,"");
+                }else{
+                    uploadFiles = uploadFiles.replace(fileID+",","");
+                }
+            }else{
+                uploadFiles = uploadFiles.replace(","+fileID,"");
+            }
+        }
+        $("#hdUploadFiles").val(uploadFiles);
+        $("#hdUploadFilesLength").val(uploadFilesLength);
+        $thelist.find("input[type='hidden'][name='fileID'][value='"+fileID+"']").parent("td").parent("tr").remove();
+
+        $thelist.find("tr").each(function(index){
+            $(this).find("td").eq(0).text(index+1);
+        });
+<!--        $.ajax({-->
+<!--            url:"../attachment/delete",-->
+<!--            type:"POST",-->
+<!--            data:{-->
+<!--                "fileID":fileID,-->
+<!--                "t":Math.random()-->
+<!--            },-->
+<!--            success:function(res){-->
+<!--                if(res.count>0){-->
+<!--                    layer.msg(res.msg);-->
+<!--                    var uploadFiles = $("#hdUploadFiles").val();-->
+<!--                    var arrFileID = uploadFiles.split(',');-->
+<!--                    for(var i=0;i<arrFileID.length;i++){-->
+<!--                        if(arrFileID[i]!=fileID){-->
+<!--                            continue;-->
+<!--                        }-->
+
+<!--                        if(i==0){-->
+<!--                            uploadFiles.replace(fileID,"");-->
+<!--                        }else{-->
+<!--                            uploadFiles.replace(","+fileID,"");-->
+<!--                        }-->
+<!--                    }-->
+<!--                    $thelist.find("tr[id="+file.id+"]").remove();-->
+<!--                }-->
+<!--                else{-->
+<!--                    layer.msg(res.msg);-->
+<!--                }-->
+<!--            }-->
+<!--        });-->
+    }
+
+
+</script>
+</body>
+</html>

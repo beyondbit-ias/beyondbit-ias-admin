@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>模块选择</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../webjars/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="../UCMFontText/iconfont.css" media="all">
+    <link rel="stylesheet" href="../DIYFontText/iconfont.css" media="all">
+</head>
+<style>
+    .box{height:100%;padding:5px;}
+    .tree{top:0;left:0;bottom:5px;right:0px;position:absolute;overflow: auto;padding:10px;}
+    .bottomtextarea{left:0;bottom:2px;right:0px;height:105px;position:absolute;padding:0 20px;}
+</style>
+<style>
+    html{padding:0;margin:0;}
+    body{
+        padding:0 10px;
+    }
+    .txt16 {
+        font-size: 16px;
+        line-height: 34px;
+        display: inline-block;
+        padding: 0 10px;
+        margin-bottom: 5px;
+        border-bottom: 1px solid #999;
+    }
+    .fontshow{width:100%;clear:both;display: inline-block;}
+    .fontshow li{width:60px;height:50px;float:left;padding:5px;margin:1px;cursor:pointer;border: 1px solid #fff;}
+    .fontshow li:hover,.fontshow li.cur{border: 1px solid #ccc;}
+    .fontshow li > div.icondiv{text-align:center; }
+    .fontshow li > div.icondiv > i{ font-size: 26px; }
+    .fontshow li > div.icontext{text-align:center;    font-size: 14px;line-height:28px}
+</style>
+<body>
+<div class="box">
+
+
+    <div class="layui-tab layui-tab-card">
+        <ul class="layui-tab-title">
+            <li class="layui-this">系统图标库</li>
+            <li>自定义图标库</li>
+        </ul>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <div>
+                    <ul class="fontshow">
+
+                        <li th:each="icon,iconStat : ${sysIcon}">
+                            <div class="icondiv">
+                                <i th:class="'ucm_iconfont '+${icon.iconClass}"></i>
+                            </div>
+                            <div class="icontext" th:text="${icon.iconName}"></div>
+                        </li>
+
+
+                    </ul>
+                </div>
+                <div class="clear"></div>
+            </div>
+            <div class="layui-tab-item">
+                <div>
+                    <ul class="fontshow">
+
+                        <li th:each="icon,iconStat : ${diyIcon}">
+                            <div class="icondiv">
+                                <i th:class="'diy_iconfont '+${icon.iconClass}"></i>
+                            </div>
+                            <div class="icontext" th:text="${icon.iconName}"></div>
+                        </li>
+
+
+
+                    </ul>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+
+
+</div>
+
+<script type="text/javascript" src="../webjars/jquery/jquery.js"></script>
+<script src="../webjars/layui/layui.js" charset="utf-8"></script>
+<script>
+    //注意：选项卡 依赖 element 模块，否则无法进行功能性操作
+    layui.use('element', function(){
+        var element = layui.element;
+    });
+
+    //选择控件 供父页面调用获取返回值
+    var returnData = function () {
+
+        return $("li.cur i").eq(0).attr("class");
+    }
+
+    function init(data){
+        var IconClass = data.replace(" ", ".");
+        if (IconClass!="")
+            $("." + IconClass).eq(0).closest("li").addClass("cur");
+    }
+
+    $(function () {
+
+        $(".fontshow li").each(function () {
+            $(this).click(function () {
+                $(".fontshow li").removeClass("cur")
+                $(this).addClass("cur")
+            })
+        })
+    })
+
+</script>
+
+
+</body>
+</html>

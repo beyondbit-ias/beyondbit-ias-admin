@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>信息管理列表</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../webjars/layui/css/layui.css"  media="all">
+    <link rel="stylesheet" href="../font/iconfont.css">
+    <style>
+        body{
+            padding: 15px;
+        }
+
+        .leftMenu{
+            border:1px solid #efefef;margin:10px 0;
+        }
+        .layui-elem-quote{padding:10px;line-height:32px;}
+        .layui-table, .layui-table-view{margin:0;}
+        .iconfont{color:#89b3ff;}
+    </style>
+</head>
+<body>
+
+<div>
+    <div class="layui-row layui-col-space10">
+        <div class="layui-col-md3 layui-col-sm3">
+            <blockquote class="layui-elem-quote">
+                栏目导航
+            </blockquote>
+            <div class="leftMenu">
+                <ul id="treeDemo" class="ztree" style="height: 447px;overflow: auto;"></ul>
+            </div>
+
+
+        </div>
+        <div class="layui-col-md9 layui-col-sm9">
+            <blockquote class="layui-elem-quote">
+                <span id="subjectNameTitle" th:text="${subjectName}">信息管理</span>
+                <div id="demoTable" style="width:50%;float:right;text-align:right;">
+                    <a name="new" href="javascript:void(0);" class="layui-btn layui-btn-normal layui-btn-sm">新建</a>
+                    <a name="delete" class="layui-btn layui-btn-danger layui-btn-sm" data-type="delSelected">删除</a>
+                </div>
+            </blockquote>
+            <table id="table" lay-filter="table"></table>
+        </div>
+
+        <input type="hidden" name="subjectUUID" id="subjectUUID" th:value="${subjectUUID}"/>
+        <input type="hidden" name="subjectName" id="subjectName" th:value="${subjectName}"/>
+    </div>
+</div>
+
+<script type="text/html" id="titleTpl">
+    <span title="{{d.title}}">{{d.title}}</span>
+</script>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">修改</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+
+<script src="../webjars/layui/layui.js" charset="utf-8"></script>
+<script type="text/javascript" src="../webjars/jquery/jquery.min.js"></script>
+<link rel="stylesheet" href="../webjars/zTree/css/zTreeStyle/zTreeStyle.css" media="all">
+<script type="text/javascript" src="../webjars/zTree/js/jquery.ztree.core.js"></script>
+<script type="text/javascript" src="../webjars/zTree/js/jquery.ztree.excheck.js"></script>
+<script type="text/javascript" src="../webjars/zTree/js/jquery.ztree.exedit.js"></script>
+
+<style>
+    .ztree * {
+        font-size:14px;
+    }
+    .ztree li{
+        line-height:25px;
+    }
+    .ztree li span{
+        line-height:25px;
+    }
+</style>
+<script th:inline="none">
+    //给ztree外部调用
+    layui.define(['table'],function(exports){
+        exports("reload",function(subjectUUID){
+            var table = layui.table;
+            //执行重载
+            table.reload('table', {
+                page: {
+                    curr: 1 //重新从第 1 页开始
+                }
+                ,where: {
+                    "subjectUUIDList":subjectUUID,
+                    "t":Math.random()
+                }
+            }, 'data');
+        })
+    });
+
+
+    layui.use(['table', 'form', 'laypage'], function () {
+        var table = layui.table;
+        var form = layui.form;
+        var laypage = layui.laypage;
+        var $ = layui.$;
+
+        //方法级渲染
+        var subjectUUID=$("#subjectUUID").val();
+        console.log(subjectUUID);
+        table.render({
+            elem: '#table'
+            ,url: '../content/queryPageList'
+            ,where: {
+                "subjectUUIDList":subjectUUID,
+                "t":Math.random()
+            }
+            ,cols: [[{checkbox: true,width:50,align:'center'}
+                ,{type:'numbers', title: '序号', width:50}
+                ,{field:'title', title: '标题',templet: '#titleTpl',style:'cursor: pointer;'}
+                ,{field:'isVisible', title: '前台显示', width:90}
+                ,{field:'author', title: '发布人', width:120}
+                ,{field:'createTime', title: '发布时间', width:160}
+                ,{field:'sequence', title: '排序', width:70,edit: 'text',sort: true, align:'center'}
+                ,{fixed: 'right',title:'操作', width:120, align:'center', toolbar: '#barDemo',align:'center'}
+            ]]
+            ,id: 'table'
+            ,page: {
+                layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'] //自定义分页布局
+                //,curr: 5 //设定初始在第 5 页
+                //, groups: 1 //只显示 1 个连续页码
+                //, first: false //不显示首页
+                //, last: false //不显示尾页
+                ,limit:10
+            }
+        });
+
+        //监听工具条
+        table.on('tool(table)', function (obj) {
+            var data = obj.data;
+            //监听工具条
+
+            if (obj.event === 'del') {
+                layer.confirm('确认删除吗？', {
+                  btn: ['确认', '取消']
+                  ,btn3: function(index, layero){
+                    layer.close(index);
+                  }
+                }, function(index, layero){
+                    $.ajax({
+                        url: "../content/delete",
+                        data: {
+                            "contentUUID":data.uuid,
+                            "subjectUUID":$("#subjectUUID").val(),
+                            "t":Math.random()
+                        },
+                        success: function (res) {
+                            if(res.count>0){
+                                layer.msg("删除成功！");
+                                var subjectUUID=$("#subjectUUID").val();
+                                layui.reload($("#subjectUUID").val());
+                            }else{
+                                layer.msg("删除失败！"+res.msg);
+                            }
+                        }
+                    });
+                });
+
+            } else if (obj.event === 'edit') {
+                //layer.msg('ID：'+ data.id + ' 的查看操作');
+
+                var url="../content/edit?subjectUUID="+$("#subjectUUID").val()+"&contentUUID="+data.uuid;
+                layer.open({
+                    type: 2,
+                    title: '信息发布修改',
+                    shadeClose: true,
+                    shade: 0.8,
+                    area: ['100%', '100%'],
+                    content: url
+                });
+            }
+        });
+
+        //监听单元格编辑，修改排序
+        table.on('edit(table)', function (obj) {
+            var value = obj.value //得到修改后的值
+                , data = obj.data //得到所在行所有键值
+                , field = obj.field; //得到字段
+            $.ajax({
+                url: "../content/updateSequence",
+                data: {
+                    "sequence":data.sequence,
+                    "contentUUID":data.uuid,
+                    "subjectUUID":$("#subjectUUID").val(),
+                    "t":Math.random()
+                },
+
+                success: function (data) {
+                    console.log(data);
+                    if (data > 0) {
+                        layer.msg('排序号更改成功！');
+                    }
+
+                }
+            })
+
+        });
+
+        //事件
+        var $ = layui.$,active = {
+            delSelected: function () { //获取选中数据
+                var checkStatus = table.checkStatus('table')
+                    , checkData = checkStatus.data;
+                if (checkData.length === 0) {
+                    return layer.msg('请选择待删除行');
+                }
+                var uuids = "";
+                if (checkData.length > 0) {
+                    for (var i = 0; i < checkData.length; i++) {
+                        uuids += checkData[i].contentSubjectUUID + ",";
+                    }
+                }
+                layer.confirm('是否确认批量删除？', function (index) {
+                    $.ajax({
+                        url: "../content/deleteList",
+                        data: {
+                            "uuidList": uuids,
+                        },
+                        type: "post",
+                        dataType: "json",
+                        success: function (res) {
+                            if (res.count == 1) {
+                                layer.msg(res.msg);
+                                var subjectUUID=$("#subjectUUID").val();
+                                layui.reload($("#subjectUUID").val());
+                            }else{
+                                layer.msg(res.msg);
+                            }
+                        }
+                    })
+
+                });
+            }
+        };
+
+        $('#demoTable .layui-btn').bind('click', function(){
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+    });
+
+
+    function checkCanPublish(){
+        $.ajax({
+            url:"../content/canPublish",
+            type:"GET",
+            data:{
+                "subjectUUID":$("#subjectUUID").val(),
+                "subjectName":$("#subjectName").val(),
+                "t":Math.random()
+            },
+            success:function(res){
+                if(res.count==1){
+                    $("a[name='new']").show();
+                    $("a[name='delete']").show();
+                }else{
+                    $("a[name='new']").hide();
+                    $("a[name='delete']").hide();
+                }
+            }
+        });
+    }
+    $(function () {
+        //debugger;
+        //ztree
+        var setting = {
+            view: {
+                showIcon: false
+            },
+            check: {
+                enable: false,
+                chkboxType: {"Y": "", "N": ""}
+            },
+            data: {
+                simpleData: {
+                    enable: true
+                }
+            },
+            callback: {
+                onClick: zTreeOnClick,
+                /*beforeClick: zTreeBeforeClick*/
+            }
+        };
+
+        function zTreeOnClick(event, treeId, treeNode) {
+            //alert(treeNode.id + ", " + treeNode.name+","+treeNode.isParent);
+            //if(!treeNode.isParent)
+            layui.reload(treeNode.id);
+            $("#subjectUUID").val(treeNode.id);
+            $("#subjectName").val(treeNode.name);
+            $("#subjectNameTitle").text(treeNode.name);
+            checkCanPublish();
+        };
+
+        function zTreeBeforeClick(treeId, treeNode) {
+            return (!treeNode.isParent);
+        };
+
+        $.ajax({
+            url: "../subject/queryTreeList",
+            success: function (data) {
+                $.fn.zTree.init($("#treeDemo"), setting, data);
+                //默认id为1，code为root，name为菜单管理自动展开
+                var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
+                var nodes = treeObj.getNodes();
+                treeObj.expandNode(nodes[0], true);
+            }
+
+        });
+
+        checkCanPublish();
+
+        //新建
+        $("a[name='new']").bind("click",function(){
+            var url="../content/add?subjectUUID="+$("#subjectUUID").val()+"&subjectName="+$("#subjectName").val();
+            layer.open({
+                type: 2,
+                title: '信息发布',
+                shadeClose: true,
+                shade: 0.8,
+                area: ['100%', '100%'],
+                content: url
+            });
+        });
+
+
+    });
+
+</script>
+
+</body>
+</html>

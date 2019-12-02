@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="common::commonHeader(新增问卷调查)"></head>
+<style>
+
+    h2{text-align:center;
+        padding: 20px 5px 30px;}
+
+    h2 span{color:red;}
+    h5{line-height:1.8em;font-size:0.8em;}
+    .bottmBorder{border-bottom:1px solid #b1c9d9;}
+
+    .graybackground{background-color:#f1f2f7}
+    .leftbox{
+        background-color:#FFFFFF;right:530px; position:fixed;top:80px;bottom:15px;left:15px;overflow-y: auto;padding:0 0 15px 0
+    }
+    .rightbox{background-color:#fff;width: 500px; right:15px; position:fixed;top:80px;bottom:15px;border:1px solid #eeeff1;/*box-shadow:0 0 10px #888*/}
+    .topicBox{padding:10px;min-height:35px;position:relative;
+        cursor: pointer;}
+    .border{border:1px solid #88A3B7;}
+    .topicname{font-size:13px;font-weight:600;line-height:35px;}
+    .btnBar{padding-top:20px;text-align:center;}
+    .layui-textarea{min-height:50px;}
+    .topicBox .layui-form-checkbox{margin:5px 0;}
+    @media(max-width:480px)
+    {
+        .topicBox .layui-form-checkbox{ min-width:300px;}
+    }
+    .form{padding:5%;border:1px solid #b1c9d9;min-height:500px;}
+    .topicBox .layui-form-radio{margin:6px 10px 7px 0}
+    .scoreSpan{color:red;display:none;}
+    .btnShowScore{
+        position: absolute;
+        top: 40px;
+        right: 70px;
+        font-size: 0.8em;
+        color: #777;
+        cursor: pointer;
+    }
+</style>
+<body>
+<div class="whitebg pd10">
+    <div class="layui-form" lay-filter="testform">
+
+        <script id="demo" type="text/html">
+            <div class="btnShowScore">显示分数</div>
+            <div class="topicBox bottmBorder">
+                <h2>{{d.testname}}
+                    {{# if(d.teststatus===3){ }}
+                    <span>(已结束)</span>
+                    {{# } }}
+                    <span class="scoreSpan"></span>
+                </h2>
+                <h5>{{d.description}}</h5>
+
+            </div>
+            {{#  layui.each(d.topics, function(index, topic){ }}
+            <div class="topicBox" id="{{topic.id}}" ismustanswer="{{topic.ismustanswer}}">
+
+                <div class="topicname">
+                    {{#  if(topic.ismustanswer==1 ){ }}
+                    <span style="color:red">*</span>
+
+                    {{# } }}
+
+                    {{ topic.name }}
+                    <span class="scoreSpan" ></span>
+                </div>
+                {{#  if(topic.keys.length>0 && topic.type === 1 ){ }}
+
+                {{#  layui.each(topic.keys, function(index, item){ }}
+                    {{# var title=item.content; }}
+
+                    {{# if(item.isrightkey==1){ }}
+                    {{#  title=item.content+"（✔）";} }}
+                    <input type="checkbox" name="{{item.topicid}}" isrightkey="{{item.isrightkey}}" score="{{item.value}}" {{item.selected}}  keyid="{{item.id}}"  colnumber="{{topic.colnumber}}" lay-skin="primary" title="{{title}}">
+
+                {{#  }); }}
+
+                <!--允许其他答案-->
+                {{# if(topic.isallowotherkey==1){ }}
+                <div class="otheranswer">
+                    <input type="checkbox" name="{{topic.id}}" colnumber="0" {{topic.replycontent!=null?'checked':''}}  keyid="0" lay-skin="primary" title="{{topic.allowotherkeyname}}">
+                    <input type="text" name="{{topic.id}}" value="{{topic.replycontent!=null?topic.replycontent:''}}" />
+                </div>
+                {{# } }}
+
+                {{# }else if(  topic.keys.length>0 && topic.type===2 ){ }}
+                {{#  layui.each(topic.keys, function(index, item){ }}
+                    {{# var title=item.content; }}
+
+                    {{# if(item.isrightkey==1){ }}
+                        {{#  title=item.content+"（✔）";} }}
+                    <input type="radio" name="{{item.topicid}}" keyid="{{item.id}}" isrightkey="{{item.isrightkey}}" score="{{item.value}}" {{item.selected}}  colnumber="{{topic.colnumber}}"  lay-skin="primary" title="{{title}}">
+                {{#  }); }}
+                <!--允许其他答案-->
+                {{# if(topic.isallowotherkey==1){ }}
+                <div class="otheranswer">
+                    <input type="radio" name="{{topic.id}}" keyid="0" colnumber="0" {{topic.replycontent!=null?'checked':''}} lay-skin="primary" title="{{topic.allowotherkeyname}}">
+                    <input type="text" name="{{topic.id}}" value="{{topic.replycontent!=null?topic.replycontent:''}}"/>
+                </div>
+                {{# } }}
+                {{# }else if(  topic.type===3 ){ }}
+                <textarea  kind="textarea" class="layui-textarea" name="{{topic.id}}" style="height:{{topic.textareaheight}}px">{{topic.replycontent!=null?topic.replycontent:''}}</textarea>
+
+
+                {{# } }}
+            </div>
+
+            {{#  }); }}
+
+
+        </script>
+        <div class="form">
+            <div id="view" class="view"></div>
+
+        </div>
+    </div>
+</div>
+
+
+<script src="../webjars/layui/layui.js" charset="utf-8"></script>
+<script type="text/javascript" src="../webjars/jquery/jquery.js"></script>
+<script type="text/javascript" src="../js/commonJs.js"></script>
+<!--搜狐获取ip方法-->
+<script src="http://pv.sohu.com/cityjson?ie=utf-8"></script>
+<script>
+
+    layui.use(['laytpl','form','layer'], function() {
+        var laytpl = layui.laytpl;
+        var layer=layui.layer;
+        var form = layui.form; //select,radio默认隐藏，执行到这一步正常显示
+        $=layui.jquery;
+        //loading
+        var index = layer.load(1, {
+            shade: [0.1,'#fff'] //0.1透明度的白色背景
+        });
+
+
+        var testid=GetQueryString("testid");
+        var replyguid=GetQueryString("replyguid");
+        $.ajax({
+            url: "../commentonline/getTestAnswer",
+            data: {'testid': testid,'replyguid':replyguid},
+            success: function (data) {
+                console.log(data);
+                //第三步：渲染模版
+
+                var getTpl = demo.innerHTML
+                    ,view = document.getElementById('view');
+                laytpl(getTpl).render(data, function(html){
+                    view.innerHTML = html;
+                });
+                form.render();
+                //根据每行多少个选项，设置宽度
+                $("input[type='checkbox']").each(function(){
+
+                    var number=$(this).attr("colnumber");
+                    if(number==0) {
+                        //允许其他答案，min-width设置为0
+                        $(this).next(".layui-form-checkbox").css("min-width", "0");
+                    }
+                    else {
+                        var width = 100 / number - 30;
+
+                        $(this).next(".layui-form-checkbox").width(width + '%');
+                    }
+
+                })
+
+                $("input[type='radio']").each(function(){
+                    var number=$(this).attr("colnumber");
+                    if(number==0) {
+                        //允许其他答案，min-width设置为0
+                        $(this).next(".layui-form-radio").css("min-width", "0");
+                    }
+                    else {
+                        var width = 75 / number;
+                        console.log(number, width);
+                        $(this).next(".layui-form-radio").width(width + '%');
+                    }
+                })
+                //计算分数
+                // 计分规则：1、key得是否正确isrightkey必须为1（正确）才积分，否则设置分数无效
+                //2、多选题，如果选择了错误选项，就为0分，如果多选得都是正确选项，那么每个key分数累加
+                var totalScore=0;
+                $(".topicBox").each(function(){
+                    var rightFlag=1;
+                    var score=0;
+                    $(this).children('input').each(function(){
+                        var check=$(this);
+                        console.log(check.attr("checked"));
+                        if(check.attr("checked")=="checked")
+                        {
+                            if(check.attr("isrightkey")==0)
+                                rightFlag=0;
+                            else
+                                score=score+parseInt(check.attr("score"));
+                            console.log(rightFlag,score);
+                        }
+                    })
+                    if(rightFlag==0)
+                        $(this).find(".scoreSpan").html("（0分）");
+                    else {
+                        $(this).find(".scoreSpan").html("（" + score + "分）");
+                        totalScore+=score;
+                    }
+
+                })
+                $("h2").find(".scoreSpan").text("（"+totalScore+"分）");
+                $(".btnShowScore").click(function(){
+                    if($(this).text()=="显示分数")
+                    {
+                        $(".scoreSpan").show();
+                        $(this).text("隐藏分数");
+                    }
+                    else
+                    {
+                        $(".scoreSpan").hide();
+                        $(this).text("显示分数");
+                    }
+                })
+                layer.closeAll('loading');
+            }
+        })
+
+
+
+
+
+    });
+
+</script>
+</body>
+</html>

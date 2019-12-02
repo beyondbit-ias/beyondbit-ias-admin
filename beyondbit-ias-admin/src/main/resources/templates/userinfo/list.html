@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>机构列表</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../webjars/layui/css/layui.css"  media="all">
+    <link rel="stylesheet" href="../font/iconfont.css">
+    <style>
+        body{
+            padding: 15px;
+        }
+
+        .leftMenu{
+            border:1px solid #efefef;margin:10px 0;
+        }
+        .layui-elem-quote{padding:10px;line-height:32px;}
+        .layui-table, .layui-table-view{margin:0;}
+        .iconfont{color:#89b3ff;}
+    </style>
+</head>
+<body>
+
+<div>
+
+
+
+    <div id="demoTable" style="text-align:right;">
+        <input type="button" class="layui-btn layui-btn-normal layui-btn-sm" onclick="openAddUser()"
+               value="新增用户"/>
+    </div>
+
+    <table id="table" lay-filter="table"></table>
+
+    <input type="hidden" id="roleguid" />
+</div>
+
+<script type="text/html" id="titleTpl">
+    {{#  if(d.deptType==3){ }}
+    <i class='layui-icon layui-icon-friends'></i>{{d.deptName}}</a>
+    {{#  } else { }}
+    <i class='layui-icon layui-icon-group'></i>{{d.deptName}}</a>
+    {{#  } }}
+</script>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">修改</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+
+<script>
+    //选择控件 供父页面调用获取返回值
+    var returnData = function () {
+        var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
+        var nodes = treeObj.getCheckedNodes(true);
+        console.log(treeObj);
+        return nodes;
+    }
+
+
+</script>
+<script src="../webjars/layui/layui.js" charset="utf-8"></script>
+<script type="text/javascript" src="../webjars/jquery/jquery.js"></script>
+<link rel="stylesheet" href="../webjars/zTree/css/zTreeStyle/zTreeStyle.css" media="all">
+<script type="text/javascript" src="../webjars/zTree/js/jquery.ztree.core.js"></script>
+<script type="text/javascript" src="../webjars/zTree/js/jquery.ztree.excheck.js"></script>
+<script type="text/javascript" src="../webjars/zTree/js/jquery.ztree.exedit.js"></script>
+
+
+<script>
+    function openAddUser(){
+        var roleguid=$("#roleguid").val();
+        window.location.href="../userinfo/getCommonselector?roleguid="+roleguid;
+    }
+
+</script>
+<script th:inline="none">
+
+    layui.define(['table'],function(exports){
+        exports("reload",function(pid){
+            var table = layui.table;
+            //执行重载
+            table.reload('table', {
+                page: {
+                    curr: 1 //重新从第 1 页开始
+                }
+                ,where: {
+                    parentId:pid
+                }
+            }, 'data');
+        })
+    })
+    layui.use(['table', 'form', 'laypage'], function () {
+        var table = layui.table;
+        var form = layui.form;
+        var laypage = layui.laypage;
+
+        if( GetQueryString("roleguid")!=null &&  GetQueryString("roleguid")!="") {//表单初始赋值
+            $("#roleguid").val(GetQueryString("roleguid"));
+        }
+        //方法级渲染
+        var roleguid=$("#roleguid").val();
+        console.log(roleguid);
+        table.render({
+            elem: '#table'
+            ,url: '../userinfo/queryrole'
+            ,where: {roleguid:roleguid}
+            ,cols: [[{type:'numbers', title: '序号', width:50, fixed: true}
+                ,{field:'account', title: '账号'}
+                ,{field:'userName', title: '姓名' }
+                ,{field:'pname', title: '所属机构'}
+            ]]
+            ,id: 'table'
+            ,page: {
+                layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'] //自定义分页布局
+                //,curr: 5 //设定初始在第 5 页
+                //, groups: 1 //只显示 1 个连续页码
+                //, first: false //不显示首页
+                //, last: false //不显示尾页
+                ,limit:10
+            }
+        });
+
+        //监听工具条
+        table.on('tool(table)', function (obj) {
+            var data = obj.data;
+            //监听工具条
+
+            if(obj.event === 'detail'){
+                //layer.msg('ID：'+ data.id + ' 的查看操作');
+                if(data.deptType==3) {
+                    window.location.href="../userinfo/add?id="+data.id;//模块
+                }
+                else{
+                    layui.reload(data.id);
+                    $("#roleguid").val(data.id);
+                    $("#pname").val(data.name);
+                }
+
+            }else if (obj.event === 'del') {
+                layer.confirm('确定删除吗？', function (index) {
+                    $.ajax({
+                        url: "../userinfo/delete",
+                        data: {id:data.id},
+                        success: function (data) {
+                            layer.msg('删除成功');
+                        }
+                    })
+                    obj.del();
+                    layer.close(index);
+                });
+            } else if (obj.event === 'edit') {
+                if(data.deptType==3)
+                {
+                    window.location.href='../userinfo/add?id='+data.id;
+                }
+                else {
+                    window.location.href='../userinfo/add?id='+data.id;
+                }
+
+            }
+        });
+        //监听单元格编辑，修改排序
+        table.on('edit(table)', function (obj) {
+            var value = obj.value //得到修改后的值
+                , data = obj.data //得到所在行所有键值
+                , field = obj.field; //得到字段
+            $.ajax({
+                url: "../userinfo/updateSequence",
+                data: {sequence:data.sequence,id:data.id},
+
+                success: function (data) {
+                    console.log(data);
+                    if (data > 0) {
+                        //layer.msg('排序号更改成功！');
+                    }
+
+                }
+            })
+
+        });
+
+        //监听排序事件
+        table.on('sort(table)', function(obj){ //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+            table.reload('table', {
+                initSort: obj //记录初始排序，如果不设的话，将无法标记表头的排序状态。
+                ,page: {
+                    curr: 1 //重新从第 1 页开始
+                }
+                ,where: {
+                    parentId:$("#roleguid").val(),
+                    orderbyClause:obj.field+" "+obj.type
+                }
+            });
+            //layer.msg('服务端排序。order by '+ obj.field + ' ' + obj.type);
+        });
+        function GetQueryString(name)
+        {
+            var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+            var r = window.location.search.substr(1).match(reg);
+            if(r!=null)return  unescape(r[2]); return null;
+        }
+
+    });
+
+
+</script>
+
+</body>
+</html>

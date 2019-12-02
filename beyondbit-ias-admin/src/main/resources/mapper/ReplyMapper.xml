@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.beyondbit.ias.admin.dao.ReplyMapper">
+    <insert id="insert">
+    insert into ${dbSchema}ADMIN_COMMENTONLINE_REPLY(TESTID, TOPICID, KEYID, CONTENT, CREATETIME, CREATOR, CREATORNAME, STATUS, IP,GUID, ISRIGHT, SEX, AGE, EDUCATION, OCCUPATION, REVENUE)
+    VALUES(#{testid},#{topicid}, #{keyid}, #{content}, #{createtime}, #{creator}, #{creatorname},#{status}, #{ip}, #{guid}, #{isright}, #{sex}, #{age}, #{education}, #{occupation}, #{revenue})
+</insert>
+    <delete id="deleteByTestID">
+        delete from ${dbSchema}ADMIN_COMMENTONLINE_REPLY where TESTID=#{testid}
+    </delete>
+
+    <select id="getReplyListByTestID" resultType="com.beyondbit.ias.admin.entity.Reply">
+        select *
+        from ${dbSchema}ADMIN_COMMENTONLINE_REPLY
+        where id in
+        (select max(id) from ${dbSchema}ADMIN_COMMENTONLINE_REPLY group by guid,testid having testid=#{testid})
+        order by CREATETIME DESC
+
+    </select>
+
+    <select id="getByKeyIDAndGuid" resultType="com.beyondbit.ias.admin.entity.Reply">
+        select * from ${dbSchema}ADMIN_COMMENTONLINE_REPLY
+        where guid=#{guid} and keyid=#{keyid}
+    </select>
+
+    <select id="getContentByTopicIDAndGuid" resultType="com.beyondbit.ias.admin.entity.Reply">
+        select * from ${dbSchema}ADMIN_COMMENTONLINE_REPLY where guid=#{guid}
+and topicid=#{topicid} and content !='' and content is not null
+    </select>
+
+    <select id="getContentByTopicID" resultType="com.beyondbit.ias.admin.entity.Reply">
+         select * from ${dbSchema}ADMIN_COMMENTONLINE_REPLY where topicid=#{topicid} and content !='' and content is not null
+
+    </select>
+
+    <select id="getCheckReplyCountByTopicID" resultType="java.lang.Integer">
+         select count(id) from ${dbSchema}ADMIN_COMMENTONLINE_REPLY where topicid=#{topicid} and keyid  is not null
+
+    </select>
+
+    <select id="getCountByKeyID" resultType="java.lang.Integer">
+        select count(id) from ${dbSchema}ADMIN_COMMENTONLINE_REPLY where keyid=#{keyid} and topicid=#{topicid}
+    </select>
+</mapper>

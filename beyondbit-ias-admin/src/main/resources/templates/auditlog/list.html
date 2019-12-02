@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>审计日志列表</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../webjars/layui/css/layui.css"  media="all">
+    <style>
+        .layui-elem-quote.smalllist {
+            padding: 10px 15px;
+            min-height: 33px;
+            background: #fff;
+        }
+        .searchlist {
+            float: left;
+        }
+        .searchlist > input {
+            display: inline-block;
+            float: left;
+            min-width: 100px;
+            width: auto;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        .searchlist > a {
+            display: inline-block;
+            float: left;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+        a.a_search {
+            padding: 0 10px;
+            color: #1e9fff;
+            line-height: 38px;
+            cursor: pointer;
+        }
+        div.btnlist {
+            float: right;
+        }
+        .btnlist > .layui-btn {
+            height: 32px;
+            line-height: 32px;
+        }
+    </style>
+</head>
+<body>
+
+<blockquote class="layui-elem-quote smalllist">
+    <div class="searchlist  layui-form">
+        <input name="search_name" id="search_contenttitle" type="text"  class="layui-input" placeholder="内容主题" autocomplete="off" />
+        <input type="button" name="btn_Click" value="搜索" id="btn_Click" class="layui-btn layui-btn-normal" />
+        <a class="a_search querysearch">高级搜索</a>
+    </div>
+
+
+    <div class="clear">
+    </div>
+</blockquote>
+
+<table class="layui-hide" id="list" lay-filter="list"></table>
+
+
+<script src="../js/common.js"></script>
+<script src="../webjars/layui/layui.js" charset="utf-8"></script>
+<script th:inline="none">
+    layui.use(['table','layer'], function(){
+        var table = layui.table
+            , layer = layui.layer;
+
+        var $ = layui.jquery;
+
+        table.render({
+            elem: '#list'
+            ,url:'query'
+            // ,toolbar: '#toolbarDemo'
+            ,title: '列表'
+            ,cols: [[
+                {type:'numbers',title:'序号'}
+                ,{field:'ip', title:'IP地址', width:120, edit: 'text'}
+                ,{field:'operateType', title:'操作类型', width:150, edit: 'text', templet: function(res){
+                        return '<em>'+ res.operateType +'</em>'
+                    }}
+                ,{field:'contentTitle', title:'内容主题'}
+                ,{field:'accountName', title:'用户姓名'}
+                ,{field:'account', title:'登录账号'}
+                ,{field:'createTime', title:'操作时间'}
+                ,{field:'logType', title:'功能模块'}
+                ,{field:'result', title:'日志状态'}
+
+            ]]
+            ,page: {
+                layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'] //自定义分页布局
+                //,curr: 5 //设定初始在第 5 页
+                //, groups: 1 //只显示 1 个连续页码
+                //, first: false //不显示首页
+                //, last: false //不显示尾页
+                ,limit:10
+            }
+        });
+
+
+
+
+
+        $('#btn_Click').on('click', function(){
+            var searchcontenttitle = $("#search_contenttitle").val();
+            table.reload('list', {
+                url: 'query'
+                ,where: {
+                    contentTitle:searchcontenttitle
+                } //设定异步数据接口的额外参数
+            });
+        });
+    });
+</script>
+</body>
+</html>

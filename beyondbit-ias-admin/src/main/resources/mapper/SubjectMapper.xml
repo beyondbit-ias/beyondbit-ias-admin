@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.beyondbit.ias.admin.dao.SubjectMapper">
+    <insert id="insert" parameterType="com.beyondbit.ias.admin.entity.Subject">
+        INSERT INTO ${dbSchema}ADMIN_INFOPUBLISH_SUBJECT
+        (UUID,NAME,PARENT_UUID,URL,CODE,IS_VISIBLE,SUBJECT_DESC,CREATE_TIME,CREATER,SEQUENCE,IS_REVIEW,REVIEWERS,IS_DELETE)
+        VALUES(#{uuid},#{name},#{parentUUID},#{url},#{code},#{isVisible},#{subjectDESC},#{createTime},#{creater},#{sequence},#{isReview},#{reviewers},#{isDelete});
+    </insert>
+
+    <update id="update" parameterType="com.beyondbit.ias.admin.entity.Subject">
+        UPDATE ${dbSchema}ADMIN_INFOPUBLISH_SUBJECT
+        SET
+        NAME = #{name},
+        PARENT_UUID = #{parentUUID},
+        URL = #{url},
+        CODE = #{code},
+        IS_VISIBLE = #{isVisible},
+        SUBJECT_DESC = #{subjectDESC},
+        CREATE_TIME = #{createTime},
+        CREATER = #{creater},
+        SEQUENCE = #{sequence},
+        IS_REVIEW = #{isReview},
+        REVIEWERS = #{reviewers},
+        IS_DELETE = #{isDelete}
+        WHERE UUID = #{uuid};
+    </update>
+
+    <select id="queryList" resultType="com.beyondbit.ias.admin.entity.Subject">
+        SELECT ID,UUID,NAME,PARENT_UUID,URL,CODE,IS_VISIBLE,SUBJECT_DESC,CREATE_TIME,CREATER,SEQUENCE,IS_REVIEW,REVIEWERS,IS_DELETE
+        FROM ${dbSchema}ADMIN_INFOPUBLISH_SUBJECT
+        WHERE 1=1
+        <if test="uuid!=null and uuid!=''">
+            AND UUID = #{uuid}
+        </if>
+        <if test="name!=null and name!=''">
+            AND NAME = #{name}
+        </if>
+        <if test="parentUUID!=null and parentUUID!=''">
+            AND PARENT_UUID = #{parentUUID}
+        </if>
+        <if test="code!=null and code!=''">
+            AND CODE = #{code}
+        </if>
+        <if test="isDelete!=null and isDelete!=''">
+            AND IS_DELETE = #{isDelete}
+        </if>
+        ORDER BY SEQUENCE ASC,ID DESC
+    </select>
+
+    <update id="updateSequence" parameterType="com.beyondbit.ias.admin.entity.Subject">
+        UPDATE ${dbSchema}ADMIN_INFOPUBLISH_SUBJECT
+        SET SEQUENCE = #{sequence}
+        WHERE UUID = #{uuid};
+    </update>
+
+    <select id="findAllSubject" resultType="com.beyondbit.ias.admin.entity.Subject">
+        SELECT ID,UUID,NAME,PARENT_UUID,URL,CODE,IS_VISIBLE,SUBJECT_DESC,CREATE_TIME,CREATER,SEQUENCE,IS_REVIEW,REVIEWERS,IS_DELETE
+        FROM ${dbSchema}ADMIN_INFOPUBLISH_SUBJECT
+        WHERE 1=1 AND IS_DELETE = 0
+    </select>
+
+    <select id="querySubjectByRoleGuid" resultType="com.beyondbit.ias.admin.entity.Subject">
+        select * from (
+        SELECT d1.*
+        FROM ${dbSchema}ADMIN_INFOPUBLISH_SUBJECT d1
+        inner join ${dbSchema}ADMIN_ACCESS d3 on d3.RESOURCEGUid=d1.UUID and d3.RESOURCETYPE=3
+        where 1=1
+        <if test="roleGuid != null and roleGuid != ''">
+            and   d3.ROLEGUID =#{roleGuid}
+        </if>
+        ) as t
+
+    </select>
+
+    <select id="findAllByAccount" resultType="com.beyondbit.ias.admin.entity.Subject">
+         select * from ${dbSchema}VIEW_USER_ALL_SUBJECT
+          where ACCOUNT=#{account}
+    </select>
+</mapper>

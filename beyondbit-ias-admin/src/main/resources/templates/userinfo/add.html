@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>机构列表</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../webjars/layui/css/layui.css" media="all">
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+</head>
+<style>
+    body {
+        padding: 20px;
+    }
+</style>
+
+<body>
+<div class="layui-form" lay-filter="layuiadmin-form" id="layuiadmin-form">
+    <div class="layui-form-item layui-hide">
+        <input readonly  type="text" name="id" id="id" class="layui-input" min="1">
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">账号</label>
+        <div class="layui-input-block">
+            <input type="text" name="account" id="account" lay-verify="required" placeholder="请输入账号" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">密码</label>
+        <div class="layui-input-block">
+            <input type="password" name="password" id="password"  class="layui-input">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">姓名</label>
+        <div class="layui-input-block">
+            <input type="text" name="userName" id="userName" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">手机</label>
+        <div class="layui-input-block">
+            <input type="text" name="mobilePhone" id="mobilePhone" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">办公电话</label>
+        <div class="layui-input-block">
+            <input type="text" name="officePhone" id="officePhone" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">邮件</label>
+        <div class="layui-input-block">
+            <input type="text" name="userEmail" id="userEmail" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">职务</label>
+        <div class="layui-input-block">
+            <input type="text" name="duty" id="duty" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">职级</label>
+        <div class="layui-input-block">
+            <input type="text" name="dutyLevel" id="dutyLevel" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">微信号</label>
+        <div class="layui-input-block">
+            <input type="text" name="weChatId" id="weChatId" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">性别</label>
+        <div class="layui-input-block">
+            <input value="男" name="sex" type="radio" title="男"/>
+            <input value="女" name="sex" type="radio" title="女"/>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">上级机构</label>
+            <div class="layui-input-inline">
+                <input type="text" name="pname" id="pname" class="layui-input">
+            </div>
+            <div class="layui-inline">
+                <input type="button" class="layui-btn group-select layui-btn-sm" style="margin-top:5px;" onclick="openDicSelector(this)"
+                       value="选择上级机构" />
+                <input type="hidden" name="deptGuid" id="deptGuid" />
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">是否停用</label>
+
+        <div class="layui-input-block">
+            <input type="checkbox" name="switchlocked" lay-skin="switch" lay-text="启用|停用" lay-filter="locked" value="0" checked>
+            <input type="hidden" id="locked" name="locked" value="0">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">所属角色</label>
+
+        <div class="layui-form-mid layui-word-aux" id="userroles"></div>
+    </div>
+
+
+    <div class="layui-form-item">
+        <label class="layui-form-label"></label>
+        <div class="layui-input-block">
+            <button class="layui-btn" lay-submit lay-filter="btnsubmit" id="btnsubmit">提交</button>
+            <button class="layui-btn" lay-submit lay-filter="btnlogin" id="btnlogin">模拟登录</button>
+            <button lay-submit class="layui-btn layui-btn-danger" lay-filter="btndelete" id="btndelete">删除</button>
+            <button style="display:none;" type="button" class="layui-btn layui-btn-primary" lay-filter="btnreturn" id="btnreturn">返回</button>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="../webjars/jquery/jquery.js"></script>
+<script src="../webjars/layui/layui.js" charset="utf-8"></script>
+
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+
+
+
+<script>
+    //外部调用方法
+    layui.define('form',function(exports){
+        var form=layui.form;
+        exports('selectRender',function(){
+            form.render("select");
+        })
+    })
+    layui.use(['form', 'layedit', 'layer', 'upload','laydate'], function () {
+        var form = layui.form
+            , layer = layui.layer
+            , layedit = layui.layedit
+            , laydate = layui.laydate;
+
+        var $ = layui.jquery;
+
+        var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+
+        //启用
+        form.on('switch(locked)', function(data){
+            if(data.elem.checked)
+            {
+                $("#locked").val(0);
+            }
+            else
+            {
+                $("#locked").val(1);
+            }
+
+        });
+
+        //监听提交
+        form.on('submit(btnsubmit)', function(data){
+            console.log(data.field);
+            $.ajax({
+                url: "../userinfo/save",
+                data: data.field,
+                success: function (data) {
+                    //console.log(data);
+                    if(data.count>0) {
+                        layer.msg("提交成功");
+                        var url = "../deptinfo/list?parentGuid=" + $("#deptGuid").val();
+                        parent.window.location.href= url;
+                        parent.layer.close(index);
+                    }
+                    else {
+                        layer.msg(data.msg);
+                        return false;
+                    }
+
+
+                }
+            })
+            return false;
+        });
+        //监听删除
+        form.on('submit(btndelete)', function(data){
+            $.ajax({
+                url: "../userinfo/delete",
+                data: data.field,
+                success: function (data) {
+                    layer.msg("删除成功");
+                    var url = "../userinfo/list?deptGuid=" + $("#deptGuid").val();
+                    parent.window.location.href= url;
+                    parent.layer.close(index);
+
+                }
+            })
+            return false;
+        });
+        //监听模拟登录
+        form.on('submit(btnlogin)', function(data){
+            var url = "../userinfo/simlogin?username=" + $("#account").val();
+            top.window.location.href= url;
+            return false;
+        });
+        //返回
+        $("#btnreturn").click(function(){
+            parent.window.location.href="../deptinfo/list?parentGuid="+$("#deptGuid").val();
+            parent.layer.close(index);
+        });
+        //编辑
+        if( GetQueryString("guid")!=null &&  GetQueryString("guid")!="") {
+            $.ajax({
+                url: "../userinfo/getByGuid",
+                data:{"guid": GetQueryString("guid")},
+                success: function (data) {
+                    //console.log(data);
+                    form.val('layuiadmin-form', {
+                        "id": data.id,
+                        "account":data.account,
+                        "userName":data.userName,
+                        "mobilePhone":data.mobilePhone,
+                        "officePhone": data.officePhone,
+                        "userEmail": data.userEmail,
+                        "duty": data.duty,
+                        "dutyLevel": data.dutyLevel,
+                        "sex": data.sex,
+                        "deptGuid":data.deptGuid,
+                        "pname":data.pname,
+                        "switchlocked":data.locked=="0"?true:false,
+                        "locked":data.locked,
+                        "weChatId":data.weChatId
+                    })
+                }
+            })
+
+            $.ajax({
+                url: "../userinfo/getUserRoles",
+                data:{"guid": GetQueryString("guid")},
+                success: function (data) {
+                    if(data)
+                    {
+                        var userrole='';
+                        $.each(data,function(index,value){
+                            userrole+=value.roleName+";"
+                        })
+                        $("#userroles").html(userrole);
+                    }
+                }
+            })
+
+            $("#account").attr("ReadOnly","ReadOnly");
+        }
+
+
+        if( GetQueryString("deptGuid")!=null &&  GetQueryString("deptGuid")!="") {//表单初始赋值
+            form.val('layuiadmin-form', {
+                "deptGuid": GetQueryString("deptGuid")
+            })
+
+        }
+
+        if( GetQueryString("pname")!=null &&  GetQueryString("pname")!="") {//表单初始赋值
+            form.val('layuiadmin-form', {
+                "pname":unescape(GetQueryString("pname"))
+            })
+        }
+
+    });
+
+    function GetQueryString(name)
+    {
+        var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+        var r = window.location.search.substr(1).match(reg);
+        if(r!=null)return  unescape(r[2]); return null;
+    }
+
+
+    //选择上级目录点击事件
+    function openDicSelector(obj)
+    {
+        var deptGuid=$("#deptGuid").val();
+        var url="../deptinfo/getCommonselector?parentGuid="+deptGuid;
+
+        layui.use(['layer'], function () {
+            var layer = layui.layer;
+            layer.open({
+                type: 2,
+                title: $(obj).val(),
+                shadeClose: false,
+                shade: 0.6,
+                area: ['380px', '100%'],
+                content: url,
+                btn: ['选择','重置', '取消'],
+                yes: function (index, layero) {
+                    // 调用子页面返回值函数
+                    var data=$(layero).find("iframe")[0].contentWindow.returnData();
+                    console.log("2",data);
+                    $("#pname").val(data.name);
+                    $("#deptGuid").val(data.id);
+
+
+                    layer.close(index);
+
+                },
+                btn1: function (index, layero) {
+
+                    layer.close(index);
+                },
+                btn2: function (index, layero) {
+
+                    layer.close(index);
+                }
+            });
+        })
+
+    }
+
+
+</script>
+
+</body>
+
+</html>

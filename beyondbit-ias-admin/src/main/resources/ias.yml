@@ -1,0 +1,13 @@
+ias:
+  userAdapterMode: bua
+  orgAdapterMode: bua
+  privilegeAdapterMode: bua
+  appCode: TSSYS
+
+
+ias-security:
+  signOnUrl: /login
+  signOutUrl: /logout
+  excludeUrls: /webjars/**;/js/**;
+  adminRole: admin
+  maximumSessions: 2

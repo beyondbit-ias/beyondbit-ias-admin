@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="common::commonHeader(新增字典)"></head>
+
+</head>
+
+
+<body>
+<div class="whitebg pd10">
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+        <legend>新增字典</legend>
+    </fieldset>
+    <div class="layui-form" lay-filter="layuiadmin-form-dic" id="layuiadmin-form-dic">
+        <div class="layui-form-item layui-hide">
+                <input readonly  type="text" name="id" id="id" class="layui-input" min="1">
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">编码</label>
+            <div class="layui-input-block">
+                <input type="text" name="code" id="code" lay-verify="required" placeholder="请输入编码" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">名称</label>
+            <div class="layui-input-block">
+                <input type="text" name="name" id="name" lay-verify="required" placeholder="请输入字典名称" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">值</label>
+            <div class="layui-input-block">
+                <input type="text" name="value" id="value" lay-verify="required" placeholder="请输入值" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">上级目录</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="pname" id="pname" class="layui-input">
+                </div>
+                <div class="layui-inline">
+                    <input type="button" class="layui-btn group-select layui-btn-sm" style="margin-top:5px;" onclick="openDicSelector(this)"
+                           value="选择上级目录" />
+                    <input type="hidden" name="parentid" id="parentid" />
+                </div>
+                </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">类型</label>
+
+            <div class="layui-input-block">
+                <select name="isdirectory" lay-filter="isdirectory">
+                    <option value="1">目录</option>
+                    <option value="0">字典项</option>
+
+                </select>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">扩展字段一</label>
+            <div class="layui-input-block">
+                <input type="text" name="extendfield1" id="extendfield1" placeholder="请输入扩展字段一" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">扩展字段二</label>
+            <div class="layui-input-block">
+                <input type="text" name="extendfield2" id="extendfield2" placeholder="请输入扩展字段二" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">扩展字段三</label>
+            <div class="layui-input-block">
+                <input type="text" name="extendfield3" id="extendfield3" placeholder="请输入扩展字段三" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">扩展字段四</label>
+            <div class="layui-input-block">
+                <input type="text" name="extendfield4" id="extendfield4" placeholder="请输入扩展字段四" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">扩展字段五</label>
+            <div class="layui-input-block">
+                <input type="text" name="extendfield5" id="extendfield5" placeholder="请输入扩展字段五" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">扩展字段六</label>
+            <div class="layui-input-block">
+                <input type="text" name="extendfield6" id="extendfield6" placeholder="请输入扩展字段六" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">扩展字段七</label>
+            <div class="layui-input-block">
+                <input type="text" name="extendfield7" id="extendfield7" placeholder="请输入扩展字段七" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">扩展字段八</label>
+            <div class="layui-input-block">
+                <input type="text" name="extendfield8" id="extendfield8" placeholder="请输入扩展字段八" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">扩展字段九</label>
+            <div class="layui-input-block">
+                <input type="text" name="extendfield9" id="extendfield9" placeholder="请输入扩展字段九" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="btnsubmit" id="btnsubmit">提交</button>
+                <button lay-submit class="layui-btn layui-btn-danger" lay-filter="btndelete" id="btndelete">删除</button>
+                <button type="button" class="layui-btn layui-btn-primary" lay-filter="btnreturn" id="btnreturn">返回</button>
+            </div>
+        </div>
+    </div>
+</div>
+    <script type="text/javascript" src="../webjars/jquery/jquery.js"></script>
+    <script src="../webjars/layui/layui.js" charset="utf-8"></script>
+
+    <!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+
+
+
+    <script>
+        //外部调用方法
+        layui.define('form',function(exports){
+            var form=layui.form;
+            exports('selectRender',function(){
+                form.render("select");
+            })
+        })
+        layui.use(['form', 'layedit', 'layer', 'upload','laydate'], function () {
+            var form = layui.form
+                , layer = layui.layer
+                , layedit = layui.layedit
+                , laydate = layui.laydate;
+
+            var $ = layui.jquery;
+
+
+            //监听提交
+            form.on('submit(btnsubmit)', function(data){
+                $.ajax({
+                    url: "../dictionary/save",
+                    data: data.field,
+                    success: function (data) {
+                        //console.log(data);
+                        if(data.count>0) {
+                            layer.msg("提交成功");
+                            var url = "../dictionary/list?parentid=" + $("#parentid").val();
+                            setTimeout("window.location.href='" + url + "'", 1500);
+                        }
+                        else {
+                            layer.msg(data.msg);
+                            return false;
+                        }
+
+
+                    }
+                })
+                return false;
+            });
+            //监听删除
+            form.on('submit(btndelete)', function(data){
+                $.ajax({
+                    url: "../dictionary/delete",
+                    data: data.field,
+                    success: function (data) {
+                        layer.msg("删除成功");
+                        var url = "../dictionary/list?parentid=" + $("#parentid").val();
+                        setTimeout("window.location.href='" + url + "'", 1500);
+
+                    }
+                })
+                return false;
+            });
+            //返回
+            $("#btnreturn").click(function(){
+                window.location.href="../dictionary/list?parentid="+$("#parentid").val();
+            });
+            //编辑
+            if( GetQueryString("id")!=null &&  GetQueryString("id")!="") {
+                $.ajax({
+                    url: "../dictionary/getById",
+                    data:{"id": GetQueryString("id")},
+                    success: function (data) {
+                        //console.log(data);
+                        form.val('layuiadmin-form-dic', {
+                            "id": data.id,
+                            "code":data.code,
+                            "value":data.value,
+                            "name":data.name,
+                            "isdirectory": data.isdirectory,
+                            "parentid":data.parentid,
+                            "pname":data.pname,
+                            "extendfield1":data.extendfield1,
+                            "extendfield2":data.extendfield2,
+                            "extendfield3":data.extendfield3,
+                            "extendfield4":data.extendfield4,
+                            "extendfield5":data.extendfield5,
+                            "extendfield6":data.extendfield6,
+                            "extendfield7":data.extendfield7,
+                            "extendfield8":data.extendfield8,
+                            "extendfield9":data.extendfield9
+                        })
+                    }
+                })
+                $("#code").attr("ReadOnly","ReadOnly");
+            }
+
+            //新增目录还是新增字典项的初始化
+            if( GetQueryString("isdirectory")!=null &&  GetQueryString("isdirectory")!="") {//表单初始赋值
+                form.val('layuiadmin-form-dic', {
+                    "isdirectory": GetQueryString("isdirectory")
+                })
+            }
+
+            if( GetQueryString("parentid")!=null &&  GetQueryString("parentid")!="") {//表单初始赋值
+                form.val('layuiadmin-form-dic', {
+                    "parentid": GetQueryString("parentid")
+                })
+                //如果上级栏目选的根目录“字典管理”，则只能选择目录，不能选择字典项
+                if(GetQueryString("parentid")=="1") {
+                    $("select option:last").attr("disabled", "disabled");
+                }
+            }
+
+            if( GetQueryString("pname")!=null &&  GetQueryString("pname")!="") {//表单初始赋值
+                form.val('layuiadmin-form-dic', {
+                    "pname":unescape(GetQueryString("pname"))
+                })
+            }
+
+        });
+
+        function GetQueryString(name)
+        {
+            var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+            var r = window.location.search.substr(1).match(reg);
+            if(r!=null)return  unescape(r[2]); return null;
+        }
+
+
+        //选择上级目录点击事件
+        function openDicSelector(obj)
+        {
+            var parentid=$("#parentid").val();
+            console.log("parentid",parentid);
+            var url="getCommonselector";
+            if(parentid!="")
+                url="getCommonselector?parentid="+parentid;
+            layui.use(['layer'], function () {
+                var layer = layui.layer;
+                layer.open({
+                    type: 2,
+                    title: $(obj).val(),
+                    shadeClose: false,
+                    shade: 0.6,
+                    area: ['380px', '100%'],
+                    content: url,
+                    btn: ['选择','重置', '取消'],
+                    yes: function (index, layero) {
+                        // 调用子页面返回值函数
+                        var data=$(layero).find("iframe")[0].contentWindow.returnData();
+                        console.log("2",data);
+                        $("#pname").val(data.name);
+                        $("#parentid").val(data.id);
+                        if(data.id=="1") {
+                            $("select option:last").attr("disabled", "disabled");
+                            layui.selectRender();
+                        }
+                        else {
+                            $("select option:last").removeAttr("disabled");
+                            layui.selectRender();
+                        }
+
+                        layer.close(index);
+
+                    },
+                    btn1: function (index, layero) {
+
+                        layer.close(index);
+                    },
+                    btn2: function (index, layero) {
+
+                        layer.close(index);
+                    }
+                });
+            })
+
+        }
+
+        function  parentParams()
+        {
+            return $("input[OpenDialog=1]").val();
+        }
+
+    </script>
+
+</body>
+
+</html>

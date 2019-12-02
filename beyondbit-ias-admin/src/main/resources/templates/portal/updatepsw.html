@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>用户管理-修改密码</title>
+    <link rel="stylesheet" href="../webjars/layui/css/layui.css"  media="all">
+    <link rel="stylesheet" href="../font/iconfont.css">
+</head>
+<style>
+    .layui-form-item span{color:red;}
+    .layui-form-label{width:150px;}
+    .layui-input-block{margin-left:160px;}
+</style>
+<body>
+<fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+    <legend>修改密码</legend>
+</fieldset>
+
+<form class="layui-form" action="" lay-filter="form" id="form">
+    <div class="layui-form-item">
+        <label class="layui-form-label">原密码<span>*</span></label>
+        <div class="layui-input-inline">
+            <input type="password"  name="oldpsw"  lay-verify="required"  autocomplete="off" placeholder="请输入原密码" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">新密码<span>*</span></label>
+        <div class="layui-input-inline">
+            <input type="password" name="newpsw"  lay-verify="required|pass"   autocomplete="off" placeholder="请输入新密码" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">再次输入新密码<span>*</span></label>
+        <div class="layui-input-inline">
+            <input type="password" name="newpsw2"  lay-verify="required|pass"   autocomplete="off" placeholder="请输入新密码" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn" lay-submit="" lay-filter="btn" id="submitbtn">立即提交</button>
+            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+        </div>
+    </div>
+</form>
+</body>
+</html>
+<script src="../webjars/layui/layui.js" charset="utf-8"></script>
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+<script>
+    layui.use(['form','jquery','layer'], function() {
+        var form = layui.form;
+        var layer=layui.layer;
+        var $=layui.$;
+        //监听提交
+        form.on('submit(btn)', function (data) {
+            $("#submitbtn").addClass("layui-btn-disabled");
+            $("#submitbtn").attr("disabled",true);
+            //两个新密码是否相同
+            if(data.field.newpsw!=data.field.newpsw2) {
+                layer.alert('新密码两次输入不一致！', function (index) {
+                    layer.close(index);
+                    $("#submitbtn").removeClass("layui-btn-disabled");
+                    $("#submitbtn").attr("disabled",false);
+                });
+                return false;
+            }
+            console.log(JSON.stringify(data.field),data);
+            $.ajax({
+                url: '../portal/updateMyPassword', //实际使用请改成服务端真实接口
+                data: data.field,
+                error:function(res){
+                    alert(res);
+                },
+                success: function(res){
+                    console.log(res);
+                    if(res<0)
+                    {
+                        layer.alert('原密码错误！',function(index){
+                            $("#form")[0].reset();
+                            $("#submitbtn").removeClass("layui-btn-disabled");
+                            $("#submitbtn").attr("disabled",false);
+                            layer.close(index);
+
+                        });
+
+                    }
+                    else{
+                        layer.alert('修改密码成功！',function(index){
+                            layer.closeAll();
+                        });
+
+                    }
+                }
+            });
+            return false;
+        });
+
+        //自定义验证规则
+        form.verify({
+            pass: [
+                /^[\S]{6,12}$/
+                ,'密码必须6到12位，且不能出现空格'
+            ]
+        });
+    })
+    </script>

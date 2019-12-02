@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="common::commonHeader(配置项新增)"></head>
+
+</head>
+
+<body>
+<div class="whitebg pd10">
+<fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+    <legend>新增配置项</legend>
+</fieldset>
+<div class="layui-form" action="">
+    <div class="layui-form-item">
+        <div class="layui-input-inline" id="sitenamediv">
+            <label class="layui-form-label">配置类型</label>
+            <div class="layui-input-block" style="width:400px">
+                <select id="optiontype" lay-filter="optiontype" runat="server">
+                    <option th:each="item:${dic}" th:value="${item.name}" th:text="${item.name}"></option>
+                    <option href="../dictionary/list?parentid=30">--</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">系统配置项</label>
+        <div class="layui-input-block">
+            <input type="checkbox" name="switch" id="systemmust" lay-filter="switchTest" lay-skin="switch" lay-text="是|否"  >
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label"><span style="color:red">*</span>KeyName</label>
+        <div class="layui-input-block" style="width:500px;">
+            <input type="text" name="keyname"   required  lay-verify="required||code" placeholder="请输入keyname" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+            <label class="layui-form-label"><span style="color:red">*</span>KeyValue</label>
+            <div class="layui-input-block" style="width:500px;">
+                <input type="text" name="value"  lay-verify="required" placeholder="请输入keyvalue" autocomplete="off" class="layui-input">
+            </div>
+
+    </div>
+    <div class="layui-form-item">
+            <label class="layui-form-label">配置项描述</label>
+            <div class="layui-input-block" style="width:500px;">
+                <textarea name="describe" id="describe" placeholder="请输入配置项描述" class="layui-textarea"></textarea>
+            </div>
+
+
+    </div>
+
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <input type="hidden" value="0" id="sfxtpzx">
+            <button class="layui-btn" lay-submit lay-filter="formDemo">提交</button>
+
+        </div>
+    </div>
+</div>
+</div>
+<script src="../webjars/layui/layui.js" charset="utf-8"></script>
+<script>
+    //Demo
+    layui.use('form', function(){
+        var form = layui.form;
+        var layer=layui.layer;
+        var $ = layui.jquery;
+        form.verify({
+            code:[
+                /^[a-zA-Z]{1}[a-zA-Z_0-9]+$/,'变量值必须为数字和字母并以字母开头，形如：MyStr_1'
+            ]
+        });
+        //监听指定开关
+        form.on('switch(switchTest)', function(data){
+            if(data.elem.checked){
+                $("#sfxtpzx").val("1")
+            }
+            else {
+                $("#sfxtpzx").val("0")
+
+            }
+
+        });
+        //监听提交
+        form.on('submit(formDemo)', function(data){
+            // layer.msg(JSON.stringify(data.field));
+            // return false;
+            if($("#optiontype").find("option:selected").val()==''){
+                layer.msg("请选择配置类型");
+                return false;
+            }
+            var mydata=data.field;
+            data.field.optiontype=$("#optiontype").find("option:selected").val();
+            data.field.issystemmust=$("#sfxtpzx").val();
+
+            $.ajax({
+                url: "../configuration/insertWebConfig",
+                data: mydata,
+                type: "post",
+                dataType: "json",
+                success: function (data) {
+                    if (data.count > 0) {
+                        if(data.msg=='当前配置项名称已经存在，请重新输入'){
+                            layer.msg(data.msg);
+                            return false;
+                        }else{
+                            layer.msg(data.msg);
+                            setTimeout("window.location.href='../configuration/index'", 1500);
+                        }
+
+
+                    }
+                }
+            })
+        });
+        form.on('select(optiontype)', function(data){
+            if(data.value=="--")
+                window.location.href="../dictionary/list?parentid=30";
+        });
+
+    });
+</script>
+</body>
+</html>

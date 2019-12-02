@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.beyondbit.ias.admin.dao.ContentSubjectMapper">
+    <select id="get" resultType="com.beyondbit.ias.admin.entity.ContentSubject">
+        SELECT
+        ID,UUID,CONTENT_UUID,SUBJECT_UUID,VIEW_COUNT,IS_VISIBLE,SEQUENCE,REVIEW_TIME,REVIEWER,REVIEW_OPINION,IS_DELETE
+        FROM ${dbSchema}ADMIN_INFOPUBLISH_CONTENTSUBJECT
+        WHERE 1=1
+        <if test="uuid!=null and uuid!=''">
+            AND UUID = #{uuid}
+        </if>
+        <if test="contentUUID!=null and contentUUID!=''">
+            AND CONTENT_UUID = #{contentUUID}
+        </if>
+        <if test="subjectUUID != null and subjectUUID !=''">
+            AND SUBJECT_UUID = #{subjectUUID}
+        </if>
+        <if test="isDelete != null and isDelete !=''">
+            AND IS_DELETE = #{isDelete}
+        </if>
+    </select>
+    <insert id="insert">
+        INSERT INTO ${dbSchema}ADMIN_INFOPUBLISH_CONTENTSUBJECT
+        (UUID,CONTENT_UUID,SUBJECT_UUID,VIEW_COUNT,IS_VISIBLE,SEQUENCE,REVIEW_TIME,REVIEWER,REVIEW_OPINION,IS_DELETE)
+        VALUES
+        (#{uuid},#{contentUUID},#{subjectUUID},#{viewCount},#{isVisible},#{sequence},#{reviewTime},#{reviewer},#{reviewOpinion},#{isDelete});
+    </insert>
+
+    <update id="delete" parameterType="com.beyondbit.ias.admin.entity.ContentSubject">
+        UPDATE ${dbSchema}ADMIN_INFOPUBLISH_CONTENTSUBJECT
+        SET IS_DELETE = 1
+        WHERE 1=1
+        <if test="uuid != null and uuid !=''">
+            AND UUID = #{uuid}
+        </if>
+        <if test="contentUUID != null and contentUUID !=''">
+            AND CONTENT_UUID = #{contentUUID}
+        </if>
+        <if test="subjectUUID != null and subjectUUID !=''">
+            AND SUBJECT_UUID = #{subjectUUID}
+        </if>
+        <if test="isDelete != null and isDelete !=''">
+            AND IS_DELETE = #{isDelete}
+        </if>
+    </update>
+
+    <select id="queryList" resultType="com.beyondbit.ias.admin.entity.ContentSubject">
+        SELECT
+        ID,UUID,CONTENT_UUID,SUBJECT_UUID,VIEW_COUNT,IS_VISIBLE,SEQUENCE,REVIEW_TIME,REVIEWER,REVIEW_OPINION,IS_DELETE
+        FROM ${dbSchema}ADMIN_INFOPUBLISH_CONTENTSUBJECT
+        WHERE 1=1
+        <if test="contentUUID!=null and contentUUID!=''">
+            AND CONTENT_UUID = #{contentUUID}
+        </if>
+        <if test="subjectUUID != null and subjectUUID !=''">
+            AND SUBJECT_UUID = #{subjectUUID}
+        </if>
+        <if test="isDelete != null and isDelete !=''">
+            AND IS_DELETE = #{isDelete}
+        </if>
+    </select>
+
+    <update id="updateSequence">
+        UPDATE ${dbSchema}ADMIN_INFOPUBLISH_CONTENTSUBJECT
+        SET
+        SEQUENCE = #{sequence}
+        WHERE CONTENT_UUID = #{contentUUID} AND SUBJECT_UUID = #{subjectUUID};
+    </update>
+</mapper>

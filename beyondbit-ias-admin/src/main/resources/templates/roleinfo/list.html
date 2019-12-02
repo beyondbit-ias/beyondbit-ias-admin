@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>角色列表</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../webjars/layui/css/layui.css"  media="all">
+    <style>
+        body{
+            padding: 15px;
+        }
+
+        .leftMenu{
+            border:1px solid #efefef;margin:10px 0;
+        }
+        .layui-elem-quote{padding:10px;line-height:32px;}
+        .layui-table, .layui-table-view{margin:0;}
+        .iconfont{color:#89b3ff;}
+    </style>
+</head>
+<body>
+
+<div>
+    <div class="layui-row layui-col-space10">
+        <div class="layui-col-md3 layui-col-sm3">
+            <blockquote class="layui-elem-quote">
+                角色管理导航
+            </blockquote>
+            <div class="leftMenu">
+                <ul id="treeDemo" class="ztree" style="height: 447px;overflow: auto;"></ul>
+            </div>
+
+
+        </div>
+        <div class="layui-col-md9 layui-col-sm9">
+            <blockquote class="layui-elem-quote">
+                角色管理
+                <div id="demoTable" style="width:50%;float:right;text-align:right;">
+                    <input type="button" class="layui-btn layui-btn-normal layui-btn-sm" onclick="openAdd(0)"
+                           value="新建角色"/>
+                </div>
+            </blockquote>
+            <table id="table" lay-filter="table"></table>
+        </div>
+
+        <input type="hidden" name="parentGuid" id="parentGuid" value=""/>
+        <input type="hidden" name="pname" id="pname" value="角色管理"/>
+    </div>
+</div>
+
+<script type="text/html" id="titleTpl">
+    {{#  if(d.type=='USER'){ }}
+    <i class='layui-icon layui-icon-friends'></i>&nbsp;{{d.roleName}}</a>
+    {{#  } else if(d.type=='DEPT') { }}
+    <i class='layui-icon layui-icon-group'></i>&nbsp;{{d.roleName}}</a>
+    {{#  } else { }}
+    <i class='layui-icon layui-icon-user'></i>&nbsp;{{d.roleName}}</a>
+    {{#  } }}
+
+
+</script>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">修改</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+
+<script>
+    //选择控件 供父页面调用获取返回值
+    var returnData = function () {
+        var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
+        var nodes = treeObj.getCheckedNodes(true);
+        console.log(treeObj);
+        return nodes;
+    }
+
+
+</script>
+<script src="../webjars/layui/layui.js" charset="utf-8"></script>
+<script type="text/javascript" src="../webjars/jquery/jquery.js"></script>
+<link rel="stylesheet" href="../webjars/zTree/css/zTreeStyle/zTreeStyle.css" media="all">
+<script type="text/javascript" src="../webjars/zTree/js/jquery.ztree.core.js"></script>
+<script type="text/javascript" src="../webjars/zTree/js/jquery.ztree.excheck.js"></script>
+<script type="text/javascript" src="../webjars/zTree/js/jquery.ztree.exedit.js"></script>
+
+<style>
+    .ztree * {
+        font-size:14px;
+    }
+    .ztree li{
+        line-height:25px;
+    }
+    .ztree li span{
+        line-height:25px;
+    }
+    .ztree li span.button.ico_open {
+        vertical-align: text-bottom;
+    }
+    .ztree li span.button.ico_close {
+        vertical-align: text-bottom;
+    }
+    .ztree li span.button.ico_docu{
+        vertical-align: text-bottom;
+    }
+</style>
+
+<!--添加ztree监听事件-->
+<script>
+    function openAdd(value) {
+        var url="../roleinfo/add?parentGuid="+$("#parentGuid").val()+"&pname="+escape($("#pname").val());
+        //window.location.href="../roleinfo/add?parentGuid="+$("#parentGuid").val()+"&pname="+escape($("#pname").val());
+        layer.open({
+            type: 2,
+            title: '新增角色',
+            shadeClose: true,
+            shade: 0.8,
+            area: ['50%', '90%'],
+            content: url
+        });
+    }
+
+</script>
+<script th:inline="none">
+    //给ztree外部调用
+    layui.define(['table'],function(exports){
+        exports("reload",function(pid){
+            var table = layui.table;
+            //执行重载
+            table.reload('table', {
+                page: {
+                    curr: 1 //重新从第 1 页开始
+                }
+                ,where: {
+                    parentGuid:pid
+                }
+            }, 'data');
+        })
+    })
+    layui.use(['table', 'form', 'laypage'], function () {
+        var table = layui.table;
+        var form = layui.form;
+        var laypage = layui.laypage;
+
+        if( GetQueryString("parentGuid")!=null &&  GetQueryString("parentGuid")!="") {//表单初始赋值
+            $("#parentGuid").val(GetQueryString("parentGuid"));
+        }
+        //方法级渲染
+        var parentGuid=$("#parentGuid").val();
+        console.log(parentGuid);
+        table.render({
+            elem: '#table'
+            ,url: '../roleinfo/queryChildren'
+            ,where: {parentGuid:parentGuid}
+            ,cols: [[{type:'numbers', title: '序号', width:50, fixed: true}
+                ,{field:'roleName', title: '角色名称',templet: '#titleTpl',event: 'detail',style:'cursor: pointer;'}
+                ,{field:'roleCode', title: '编码' }
+                ,{field:'sequence', title: '排序', width:100,edit: 'text',sort: true}
+                ,{fixed: 'right',title:'数据操作', width:120, align:'center', toolbar: '#barDemo',align:'center'}
+            ]]
+            ,id: 'table'
+            ,page: {
+                layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'] //自定义分页布局
+                //,curr: 5 //设定初始在第 5 页
+                //, groups: 1 //只显示 1 个连续页码
+                //, first: false //不显示首页
+                //, last: false //不显示尾页
+                ,limit:10
+            }
+        });
+
+        //监听工具条
+        table.on('tool(table)', function (obj) {
+            var data = obj.data;
+            //监听工具条
+
+            if(obj.event === 'detail'){
+                //layer.msg('ID：'+ data.id + ' 的查看操作');
+
+                layui.reload(data.guid);
+                $("#parentGuid").val(data.guid);
+                $("#pname").val(data.roleName);
+
+            }else if (obj.event === 'del') {
+                layer.confirm('确定删除吗？', function (index) {
+                    $.ajax({
+                        url: "../roleinfo/delete",
+                        data: {id:data.id},
+                        success: function (data) {
+                            layer.msg('删除成功');
+                        }
+                    })
+                    obj.del();
+                    layer.close(index);
+                });
+            } else if (obj.event === 'edit') {
+                var url='../roleinfo/edit?roleguid='+data.guid;
+                //window.location.href='../roleinfo/edit?roleguid='+data.guid;
+                layer.open({
+                    type: 2,
+                    title: '修改角色',
+                    shadeClose: true,
+                    shade: 0.8,
+                    area: ['80%', '90%'],
+                    content: url
+                });
+            }
+        });
+        //监听单元格编辑，修改排序
+        table.on('edit(table)', function (obj) {
+            var value = obj.value //得到修改后的值
+                , data = obj.data //得到所在行所有键值
+                , field = obj.field; //得到字段
+            $.ajax({
+                url: "../roleinfo/updateSequence",
+                data: {sequence:data.sequence,id:data.id},
+
+                success: function (data) {
+                    console.log(data);
+                    if (data > 0) {
+                        //layer.msg('排序号更改成功！');
+                    }
+
+                }
+            })
+
+        });
+
+        //监听排序事件
+        table.on('sort(table)', function(obj){ //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+            table.reload('table', {
+                initSort: obj //记录初始排序，如果不设的话，将无法标记表头的排序状态。
+                ,page: {
+                    curr: 1 //重新从第 1 页开始
+                }
+                ,where: {
+                    parentGuid:$("#parentGuid").val(),
+                    orderbyClause:obj.field+" "+obj.type
+                }
+            });
+            //layer.msg('服务端排序。order by '+ obj.field + ' ' + obj.type);
+        });
+        function GetQueryString(name)
+        {
+            var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+            var r = window.location.search.substr(1).match(reg);
+            if(r!=null)return  unescape(r[2]); return null;
+        }
+
+    });
+    $(function () {
+        //debugger;
+        //ztree
+        var setting = {
+            view: {
+                showIcon: true
+            },
+            check: {
+                enable: false,
+                chkboxType: {"Y": "", "N": ""}
+            },
+            data: {
+                simpleData: {
+                    enable: true
+                }
+            },
+            callback: {
+                onClick: zTreeOnClick,
+                /*beforeClick: zTreeBeforeClick*/
+            }
+        };
+
+        function zTreeOnClick(event, treeId, treeNode) {
+            //alert(treeNode.id + ", " + treeNode.name+","+treeNode.isParent);
+            //if(!treeNode.isParent)
+            layui.reload(treeNode.id);
+            $("#parentGuid").val(treeNode.id);
+            $("#pname").val(treeNode.name);
+        };
+
+        function zTreeBeforeClick(treeId, treeNode) {
+            return (!treeNode.isParent);
+        };
+
+        $.ajax({
+            url: "../roleinfo/getZtree",
+            success: function (data) {
+                $.fn.zTree.init($("#treeDemo"), setting, data);
+                //默认id为1，code为root，name为菜单管理自动展开
+                // var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
+                // var nodes = treeObj.getNodes();
+                // treeObj.expandNode(nodes[0], true);
+            }
+
+        })
+
+    });
+
+</script>
+
+</body>
+</html>

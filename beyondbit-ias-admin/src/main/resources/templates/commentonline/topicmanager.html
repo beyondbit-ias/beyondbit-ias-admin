@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="common::commonHeader(问卷管理)"></head>
+<style>
+
+    h2{text-align:center;
+        padding: 20px 5px;}
+    h5{line-height:1.8em;font-size:0.8em;}
+
+    .leftbox{
+        background-color:#FFFFFF;right:530px; position:fixed;top:80px;bottom:15px;left:15px;overflow-y: auto;padding:0 0 15px 0
+    }
+    .rightbox{background-color:#fff;width: 500px; right:15px; position:fixed;top:80px;bottom:15px;border:1px solid #eeeff1;/*box-shadow:0 0 10px #888*/}
+    .topicBox{padding:10px;min-height:35px;position:relative;
+        cursor: pointer;}
+    .border{border:1px solid #88A3B7;}
+    .topicname{font-size:13px;font-weight:600;line-height:35px;}
+    .btnBar{position:absolute;right:3px;top:3px;
+        display: none;}
+    .layui-textarea{min-height:50px;}
+    .topicBox .layui-form-checkbox{margin:5px 0;}
+    @media(max-width:480px)
+    {
+        .topicBox .layui-form-checkbox{ min-width:300px;}
+    }
+    .otheranswer{width:100%;}
+    .layui-form-radio{margin:6px 10px 7px 0;color:#666;}
+</style>
+<body>
+<blockquote class="layui-elem-quote">
+    评议管理
+    <div id="demoTable" style="width:50%;float:right;text-align:right;">
+        <button class="layui-btn layui-btn-sm" lay-filter="addTopic" lay-submit="">添加题目</button>
+        <button class="layui-btn layui-btn-sm" lay-filter="changeTestStatus" lay-submit="">发布</button>
+        <button class="layui-btn layui-btn-normal layui-btn-sm" lay-filter="preview" lay-submit="">预览</button>
+        <button class="layui-btn layui-btn-primary layui-btn-sm" lay-filter="returnList" lay-submit="">返回</button>
+    </div>
+</blockquote>
+<div class="leftbox">
+    <div class="layui-form" lay-filter="testform">
+
+    <script id="demo" type="text/html">
+        <div class="topicBox">
+            <h2>{{d.testname}}</h2>
+            <h5>{{d.description}}</h5>
+            <div class="btnBar">
+                <button class="layui-btn layui-btn-sm" lay-filter="editTest" lay-submit="">编辑</button>
+
+            </div>
+        </div>
+        {{#  layui.each(d.topics, function(index, topic){ }}
+        <div class="topicBox">
+
+            <div class="topicname">
+                {{#  if(topic.ismustanswer==1 ){ }}
+                <span style="color:red">*</span>
+                {{# } }}
+                {{ topic.name }}</div>
+            {{#  if(topic.keys.length>0 && topic.type === 1 ){ }}
+
+                {{#  layui.each(topic.keys, function(index, item){ }}
+            <input type="checkbox" name="{{item.topicid}}" colnumber="{{topic.colnumber}}" lay-skin="primary" title="{{item.content}}">
+                {{#  }); }}
+                <!--允许其他答案-->
+                {{# if(topic.isallowotherkey==1){ }}
+                <div class="otheranswer">
+                    <input type="checkbox" name="{{topic.allowotherkeyname}}" colnumber="0" lay-skin="primary" title="{{topic.allowotherkeyname}}">
+                    <input type="text" name="{{topic.allowotherkeyname}}"/>
+                </div>
+                {{# } }}
+            {{# }else if(  topic.keys.length>0 && topic.type===2 ){ }}
+            {{#  layui.each(topic.keys, function(index, item){ }}
+            <input type="radio" name="{{item.topicid}}"  colnumber="{{topic.colnumber}}"  lay-skin="primary" title="{{item.content}}">
+            {{#  }); }}
+                <!--允许其他答案-->
+                {{# if(topic.isallowotherkey==1){ }}
+                <div class="otheranswer">
+                    <input type="radio" name="{{topic.id}}" colnumber="0" lay-skin="primary" title="{{topic.allowotherkeyname}}">
+                    <input type="text" name="{{topic.allowotherkeyname}}"/>
+                </div>
+                {{# } }}
+            {{# }else if(  topic.type===3 ){ }}
+            <textarea class="layui-textarea" style="height:{{topic.textareaheight}}px"></textarea>
+
+
+            {{# } }}
+
+            <div class="btnBar">
+                <button class="layui-btn layui-btn-sm" topicid="{{topic.id}}" lay-filter="copy" lay-submit="">复制</button>
+                <button class="layui-btn layui-btn-sm" topicid="{{topic.id}}" lay-filter="edit" lay-submit="">编辑</button>
+                <button class="layui-btn layui-btn-danger layui-btn-sm" topicid="{{topic.id}}" lay-filter="delete" lay-submit="">删除</button>
+            </div>
+        </div>
+
+        {{#  }); }}
+
+
+    </script>
+
+    <div id="view"></div>
+    </div>
+</div>
+<div class="rightbox">
+    <iframe id="iframe" src="../commentonline/addtopic" frameborder="0" width="100%"  height="100%"></iframe>
+</div>
+
+<script src="../webjars/layui/layui.js" charset="utf-8"></script>
+<script type="text/javascript" src="../webjars/jquery/jquery.js"></script>
+<script type="text/javascript" src="../js/commonJs.js"></script>
+<script src="../js/jquery-1.12.4.js"></script>
+<script>
+
+    layui.use(['laytpl','form'], function() {
+        var laytpl = layui.laytpl;
+        var form = layui.form; //select,radio默认隐藏，执行到这一步正常显示
+        $=layui.jquery;
+
+        //loading
+        var index = layer.load(1, {
+            shade: [0.1,'#fff'] //0.1透明度的白色背景
+        });
+        var testid=GetQueryString("id");
+        $("#iframe").attr("src","../commentonline/addtopic?testid="+testid);
+        console.log(testid);
+        $.ajax({
+            url: "../commentonline/gettopics",
+            data: {'testid': testid},
+            success: function (data) {
+                console.log(data);
+                var getTpl = demo.innerHTML
+                    ,view = document.getElementById('view');
+                laytpl(getTpl).render(data, function(html){
+                    view.innerHTML = html;
+                });
+                form.render();
+
+                //根据colnumber，设置单选多选的宽度，达到一行排列colnumber个
+                $("input[type='checkbox']").each(function(){
+                    var number=$(this).attr("colnumber");
+                    if(number==0) {
+                        //允许其他答案，min-width设置为0
+                        $(this).next(".layui-form-checkbox").css("min-width", "0");
+                    }
+                    else {
+                        var width = 100 / number - 30;
+                        console.log(number, width);
+                        $(this).next(".layui-form-checkbox").width(width + '%');
+                    }
+                })
+
+                $("input[type='radio']").each(function(){
+                    var number=$(this).attr("colnumber");
+                    if(number==0) {
+                        //允许其他答案，min-width设置为0
+                        $(this).next(".layui-form-radio").css("min-width", "0");
+                    }
+                    else {
+                        var width = 75 / number;
+                        console.log(number, width);
+                        $(this).next(".layui-form-radio").width(width + '%');
+                    }
+                })
+
+                layer.closeAll('loading');
+            }
+        })
+
+        form.on('submit(copy)', function(data){
+            var btn=$(data.elem);
+            console.log(btn.attr("topicid"));
+            var url="../commentonline/addtopic?id="+btn.attr("topicid")+"&op=copy&testid="+testid;
+            $("#iframe").attr("src",url);
+            return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+        });
+        form.on('submit(edit)', function(data){
+            var btn=$(data.elem);
+            console.log(btn.attr("topicid"));
+            var url="../commentonline/addtopic?id="+btn.attr("topicid")+"&op=edit&testid="+testid;
+            $("#iframe").attr("src",url);
+            return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+        });
+        form.on('submit(delete)',function(data){
+            layer.confirm('确定删除吗？', function(index) {
+                var btn=$(data.elem);
+                var topicid=btn.attr("topicid");
+                $.ajax({
+                    url: "../commentonline/deletetopic",
+                    data: {'id': topicid},
+                    success: function (data) {
+                        console.log(data);
+                        //第三步：渲染模版
+                        form.render();
+                        window.location.href="../commentonline/topicmanager?id="+testid;
+                    }
+                })
+                layer.close(index);
+            });
+            return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+        })
+        form.on('submit(editTest)', function(data){
+            var url="../commentonline/addtest?id="+testid;
+            window.location.href=url;
+        });
+        form.on('submit(addTopic)', function(data){
+            var url="../commentonline/addtopic?testid="+testid;
+            $("#iframe").attr("src",url);
+            return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+        });
+        form.on('submit(preview)', function(data){
+            var url="../commentonline/topicweb?type=preview&id="+testid
+            window.open(url);
+            return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+        });
+        form.on('submit(changeTestStatus)', function(data){
+            $.ajax({
+                url: "../commentonline/updateTestStauts",
+                data: {'id': testid,'status':1},
+                success: function (data) {
+                    if(data>0) {
+
+                        layer.msg("发布成功！");
+                        var url = "../commentonline/testlist";
+                        setTimeout("window.location.href='" + url + "'", 1500);
+                    }
+                }
+            });
+            return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+        });
+
+        form.on('submit(returnList)', function(data){
+            var url="../commentonline/testlist";
+            window.location.href=url;
+            return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+        });
+
+    });
+    $(function(){
+        $(".leftbox").on("mouseenter",".topicBox",function(){
+            $(".btnBar").hide();
+            $(this).find(".btnBar").show();
+            $(".topicBox").removeClass("border");
+            $(this).addClass("border");
+        })
+
+    })
+</script>
+</body>
+</html>

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>两会办理</title>
+<link rel="stylesheet" href="../webjars/layui/css/layui.css"  media="all">
+<style>
+    body {
+        min-width: 520px;
+        padding:10px;
+        background:#f2f2f2;
+    }
+
+
+
+    .dbContent{background:#fff;width:100%;height: 270px;overflow: hidden;/* border:1px solid #d1dee5; */font-family: "微软雅黑";/*margin:10px 2%;*/}
+    .dbContent a{cursor: pointer;}
+    .box{float:left;width:90%;padding: 15px 5%;}
+    .title{border-bottom:1px solid #d1dee5;padding: 15px 0 15px 6px;font-size:1.1em;font-weight:500;/* background-color:#f2f6f8; */color: #;color: #666;}
+    .title .liner{width:7px;height:18px;/* background:linear-gradient(180deg, #0ca9fb, #803fff); */float:left;margin:3px 8px 0;}
+    .title .more{width:20px;float:right;margin-right:10px;color:#333;font-size:18px;font-weight:700;}
+    .item{width: 38%;float:left;font-size: 0.85em;text-align: left;margin: 3px 1%;color: #666;padding: 10px 5%;/*background:linear-gradient(180deg, #fafdff, #d3e2ec);*/background: #f8f8f8;}
+    .item span{width:100%;float:left;/* padding-top: 10px; */color: #FF6000;font-size: 2.7em;text-align: left;}
+    .dbContent ul{padding:0;margin:0 5%;}
+    .dbContent li{font-size:14px;line-height:28px;height:28px;overflow:hidden;list-style-type:none;padding:6px 15px;border-bottom:1px dashed #ccc;}
+    .dbContent li span{float:right;padding: 0 5px 0 15px;}
+
+
+    .column {
+        float: left;
+        /*border:1px solid #fd5f00;*/
+
+    }
+
+    .portlet {
+        margin: 0 1em 1em 0;
+        /*padding: 1em;
+        border: 1px solid #ccc;
+        height: 250px;*/
+        height:auto;
+        overflow: hidden;
+
+    }
+
+    .shadow {
+
+        -webkit-box-shadow: 8px 8px 8px #c8c8c8;
+        -moz-box-shadow: 8px 8px 8px #c8c8c8;
+        box-shadow: 8px 8px 8px #c8c8c8;
+    }
+
+
+    .portlet-placeholder {
+        border: 1px solid pink;
+        background: pink;
+        padding:10px;
+        margin: 0 1em 1em 0;
+        height: 100px;
+    }
+
+    /*.emptycol{border: 1px solid burlywood;}*/
+    .emptycol .portlet-placeholder {
+        border: 1px solid pink;
+        background: pink;
+        padding:10px;
+        margin: 0 1em 1em 0;
+        height: 100px;
+    }
+
+    .one{width:100%;}
+    .two{width:50%;         min-height:10px;}
+    .three{width:33.3%;         min-height:10px;}
+
+</style>
+<!--    <script src="../webjars/layui/layui.js" charset="utf-8"></script>-->
+
+    <script src="../js/jquery-1.12.4.js"></script>
+    <script src="../js/jquery-ui.js"></script>
+<script src="../webjars/github-com-sentsin-layer-/layer.js"></script>
+    <script>
+        $(function () {
+            var clientWidth = document.body.clientWidth;
+            $(".column").sortable({
+                connectWith: ".column",
+                handle: ".title",
+                cancel: ".portlet-toggle",
+                placeholder: "portlet-placeholder ui-corner-all",
+                scroll: true,
+                disabled: true,//默认不可拖动
+                deactivate: function (event, ui) {
+                    //console.log(event,ui);
+                    //console.log(ui.offset.left);
+                },
+                sort: function (event, ui) {
+                    // var colnumber = 3 - $(".emptycol").length;
+                    // console.log(ui.placeholder,ui);
+                    // if (ui.offset.left > clientWidth / 2 ) {
+                    //
+                    //     //one修改成two
+                    //     //alert(ui.placeholder.attr("class"));
+                    //     //$(".column").width("48%");
+                    // }
+                    // if (ui.offset.left > clientWidth / 3 * 2 ) {
+                    //     //console.log(">600");
+                    //
+                    //     //alert(ui.placeholder.attr("class"));
+                    //    // $(".column").width("33%");
+                    // }
+                    // //$(".column").attr("title","把粉色框拖入想要放置的虚线框中");
+
+
+
+                },
+                start: function (event, ui) {
+                    //console.log("start", ui.item.attr("id"));
+                    $(".emptycol").css({"padding-bottom":"150px","border":"1px dashed #ccc","margin":"-1px"});
+                },
+                stop: function (event, ui) {
+                    changeColWidth();
+                    //setHight();
+                    //console.log(ui.placeholder.attr("class"),$(this).height());
+                    //alert("stop");
+                    $(".column").css({"padding-bottom":"0px","border":"none"});
+                },
+                receive:function(event,ui){
+                    //alert("开始记录数据库");
+                    //alert(ui.placeholder.attr("class"));
+                    $(".column").css({"padding-bottom":"0px","border":"none"});
+                },
+            });
+
+
+
+
+            function changeColWidth() {
+                var thisColnum = 0;
+                var width = "100%";
+                $(".column").each(function () {
+                    if ($(this).find(".portlet").length > 0) {
+                        thisColnum++;
+                        $(this).removeClass("emptycol");
+                    } else
+                        $(this).addClass("emptycol");
+                })
+                // var colnum = thisColnum;
+                // //console.log(colnum);
+                // switch (thisColnum) {
+                //     case 1:
+                //         width = "100%";
+                //         break;
+                //     case 2:
+                //         width = "50%";
+                //         break;
+                //     case 3:
+                //         width = "33%";
+                //         break;
+                // }
+                // $(".column").css("width", width);
+                // $(".emptycol").css("width", 0);
+            }
+            $(".column").on("dblclick",".portlet",function () {
+                if ($(".portlet").hasClass("shadow")) {
+
+                    //save
+                    //记录数据库
+                    var webpartList=[];
+                    $(".column").each(function(){
+                        console.log($(this).children().length);
+                        if($(this).children().length>0)
+                        {
+                            var boxid=$(this).attr("boxid");
+                            console.log(boxid);
+                            $(this).children(".portlet").each(function(index){
+                                var webpart={};
+                                webpart.modularcode=$(this).attr("id");
+                                webpart.boxid=boxid;
+                                webpart.sequence=index+1;
+                                //webpart.url=$(this).attr("url");
+                                webpartList.push(webpart);
+                            })
+
+                        }
+                    });
+                    console.log(webpartList);
+                    if(webpartList.length>0) {
+                        $.ajax({
+                            type: "POST",
+                            url: '../webpart/insertList',
+                            data:JSON.stringify(webpartList) ,
+                            dataType: 'json',
+                            contentType: 'application/json',
+                            error: function (res) {
+                                layer.msg("调用接口失败！");
+                            },
+                            success: function (res) {
+
+                                console.log(res);
+
+                                if (res > 0)
+                                    layer.msg("保存成功！");
+                                else
+                                    layer.msg("保存失败！");
+                            }
+                        })
+                    }
+
+                    $(".portlet").removeClass("shadow");
+                    $(".column").sortable("disable");
+                } else {
+                    $(".portlet").addClass("shadow");
+                    $(".column").sortable("enable");
+
+                }
+                //alert("dblclick");
+            });
+
+            $(".portlet").addClass("ui-corner-all");
+            $(".title").css("cursor","all-scroll").attr("title","双击可拖动修改布局");
+
+            $.getJSON("../webpart/getList",{t:new Date().getTime()})
+                .then(function(res){
+                    console.log(res);
+                    var popMenu=res;
+                    // res.forEach(function(item){
+                    //     if(item.code=="indexWebpart")
+                    //         popMenu=item.children;
+                    // })
+                    // console.log(popMenu);
+                    popMenu.forEach(function(item,index){
+                        console.log(item,item.boxid,index);
+                        var $portletDiv=$("<div class='portlet'></div>");
+                        $portletDiv.attr("id",item.modularcode);
+                        //$portletDiv.attr("url",item.url);
+                        if(item.boxid=="0")
+                        {
+                            //没有自定义过位置，就放在default1和default2中，哪个webpart少放在哪个里
+                            if($("#default1").children().length<=$("#default2").children().length)
+                            {
+                                $("#default1").append($portletDiv);
+                                console.log( $("#default1").html());
+                            }
+                            else
+                            {
+                                $("#default2").append($portletDiv);
+                            }
+                        }
+                        else{
+                            //定义过位置
+                            $("[boxid='"+item.boxid+"']").append($portletDiv);
+
+                        }
+                        $("#"+item.modularcode).load(item.url);
+
+                    })
+
+                });
+
+            function setHight(){
+                $(".box1,.box2,.box3").each(function(){
+                    var item=$(this);
+                    if(item.height()<=100) {
+                        item.height("0px");
+                    }
+                    else
+                        item.children().each(function(){
+                             var _this=$(this);
+                             if(_this.height()>item.height())
+                                 item.height(_this.height());
+                        })
+                })
+            }
+            //setHight();
+
+        })
+    </script>
+</head>
+
+<body>
+
+
+<div class="column emptycol one" boxid="1a">
+
+
+
+</div>
+<div style="clear:both;"></div>
+
+<div class="column two" id="default1" boxid="2a">
+<!--    <div class="portlet shadow" id="webpart_upc_otherList"  url="/upc/indexPageModule/jumpToEnd"><div id="otherContent" class="dbContent">-->
+<!--        <div class="area">-->
+<!--            <div class="title"><div class="liner"></div><a href="/unpc/proposal/otherRefereeList"><div class="more">+</div></a>我的联名建议列表3</div>-->
+
+<!--        </div>-->
+<!--    </div></div>-->
+<!--    <div class="portlet shadow" id="webpart_upc_otherList" url="/upc/indexPageModule/jumpToEnd"><div id="otherContent" class="dbContent">-->
+<!--        <div class="area">-->
+<!--            <div class="title"><div class="liner"></div><a href="/unpc/proposal/otherRefereeList"><div class="more">+</div></a>我的联名建议列表4</div>-->
+
+<!--        </div>-->
+<!--    </div></div>-->
+
+</div>
+<div class="column two" id="default2" boxid="2b">
+<!--    <div class="portlet shadow" id="webpart_upc_otherList" url="/upc/indexPageModule/jumpToEnd"><div id="otherContent" class="dbContent">-->
+<!--        <div class="area">-->
+<!--            <div class="title"><div class="liner"></div><a href="/unpc/proposal/otherRefereeList"><div class="more">+</div></a>我的联名建议列表</div>-->
+
+<!--        </div>-->
+<!--    </div></div>-->
+<!--    <div class="portlet shadow" id="webpart_upc_otherList" url="/upc/indexPageModule/jumpToEnd"><div id="otherContent" class="dbContent">-->
+<!--        <div class="area">-->
+<!--            <div class="title"><div class="liner"></div><a href="/unpc/proposal/otherRefereeList"><div class="more">+</div></a>我的联名建议列表2</div>-->
+
+<!--        </div>-->
+<!--    </div></div>-->
+</div>
+
+<div style="clear:both;"></div>
+
+<div class="column emptycol three" boxid="3a">
+
+</div>
+<div class="column emptycol three" boxid="3b">
+
+</div>
+<div class="column emptycol three" boxid="3c">
+
+</div>
+
+<div style="clear:both;"></div>
+
+<div class="column emptycol one" boxid="1b">
+</div>
+
+<div style="clear:both;"></div>
+
+<div class="column emptycol two" boxid="2c">
+
+</div>
+<div class="column emptycol two" boxid="2d">
+
+</div>
+
+<div style="clear:both;"></div>
+
+<div class="column emptycol three" boxid="3d">
+
+</div>
+<div class="column emptycol three" boxid="3e">
+
+</div>
+<div class="column emptycol three" boxid="3f">
+
+
+</div>
+</body>
+</html>
+
