@@ -45,7 +45,7 @@
     </dependencyManagement>
 
     <dependencies>
-       <dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
@@ -65,21 +65,9 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-security</artifactId>
-    </dependency>
-        <dependency>
             <groupId>org.mybatis.spring.boot</groupId>
             <artifactId>mybatis-spring-boot-starter</artifactId>
             <version>2.0.1</version>
-        </dependency>
-         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-openfeign-core</artifactId>
-        </dependency>
-          <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-openfeign</artifactId>
         </dependency>
 
         <dependency>
@@ -137,8 +125,6 @@
             <groupId>Dm7JdbcDriver16</groupId>
             <artifactId>Dm7JdbcDriver16</artifactId>
             <version>7.1.4.27</version>
-             <scope>system</scope>
-            <systemPath>${basedir}/src/main/resources/lib/Dm7JdbcDriver16-7.1.4.27.jar</systemPath>
         </dependency>
         <!-- mysql-connector-java -->
         <dependency>
@@ -161,15 +147,11 @@
             <groupId>com.beyondbit.bua</groupId>
             <artifactId>beyondbit-bua-client-schemas</artifactId>
             <version>1.0.3-SNAPSHOT</version>
-              <scope>system</scope>
-            <systemPath>${basedir}/src/main/resources/lib/beyondbit-bua-client-schemas-1.0.3-SNAPSHOT.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.beyondbit.bua</groupId>
             <artifactId>beyondbit-bua-client-v2</artifactId>
             <version>2.0.3-SNAPSHOT</version>
-              <scope>system</scope>
-            <systemPath>${basedir}/src/main/resources/lib/beyondbit-bua-client-v2-2.0.3-SNAPSHOT.jar</systemPath>
         </dependency>
 
         <!-- SSO客户端 -->
@@ -177,8 +159,6 @@
             <groupId>com.beyondbit.sso</groupId>
             <artifactId>beyondbit-sso-client</artifactId>
             <version>3.0.11</version>
-                <scope>system</scope>
-            <systemPath>${basedir}/src/main/resources/lib/beyondbit-sso-client-3.0.11.jar</systemPath>
         </dependency>
 
         <dependency>
@@ -190,8 +170,6 @@
             <groupId>com.beyondbit.ias</groupId>
             <artifactId>beyondbit-ias-core</artifactId>
             <version>1.0.1-SNAPSHOT</version>
-              <scope>system</scope>
-            <systemPath>${basedir}/src/main/resources/lib/beyondbit-ias-core-1.0.1-SNAPSHOT.jar</systemPath>
         </dependency>
 
         <dependency>
@@ -233,10 +211,7 @@
 
     <build>
         <plugins>
-  <plugin>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
-      </plugin>
+
 
             <plugin>
                 <artifactId>maven-war-plugin</artifactId>
@@ -247,32 +222,32 @@
         <finalName>portal</finalName>
     </build>
 
-<!--     用于连接私有maven库 -->
-<!--     <repositories> -->
-<!--         <repository> -->
-<!--             <id>tfs-server-beyondbit-ias</id> -->
-<!--             <url>http://192.168.5.130:8080/tfs/iascollection/_packaging/beyondbit-ias/maven/v1</url> -->
-<!--             <releases> -->
-<!--                 <enabled>true</enabled> -->
-<!--             </releases> -->
-<!--             <snapshots> -->
-<!--                 <enabled>true</enabled> -->
-<!--             </snapshots> -->
-<!--         </repository> -->
+    <!--用于连接私有maven库-->
+    <repositories>
+        <repository>
+            <id>tfs-server-beyondbit-ias</id>
+            <url>http://192.168.5.130:8080/tfs/iascollection/_packaging/beyondbit-ias/maven/v1</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
 
 
-<!--         <repository> -->
-<!--             <id>tfs-beyondbit.com-default</id> -->
-<!--             <url>http://tfs.beyondbit.com:5000/tfs/DefaultCollection/_packaging/Default/maven/v1</url> -->
-<!--             <releases> -->
-<!--                 <enabled>true</enabled> -->
-<!--             </releases> -->
-<!--             <snapshots> -->
-<!--                 <enabled>true</enabled> -->
-<!--             </snapshots> -->
-<!--         </repository> -->
+        <repository>
+            <id>tfs-beyondbit.com-default</id>
+            <url>http://tfs.beyondbit.com:5000/tfs/DefaultCollection/_packaging/Default/maven/v1</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
 
-<!--     </repositories> -->
+    </repositories>
 
     <packaging>war</packaging>
 </project>

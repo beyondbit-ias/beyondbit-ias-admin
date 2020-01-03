@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8" />
-    <title>浦东妇联</title>
+    <title th:text="${systemTitle}"></title>
     <link href="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" />
     <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
     <script src="http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>
@@ -17,7 +17,7 @@
 <form id="form1" class="well layui-form" method="post" th:action="@{/login}"
       style="width: 30em; margin: auto; margin-top: 150px;">
 
-    <h3>浦东妇联</h3>
+    <h3 th:text="${systemTitle}"></h3>
     <div th:if="${param.error}" class="alert alert-danger" role="alert">用户名或密码错误</div>
     <div th:if="${param.logout}" class="alert alert-success" role="alert">已登出</div>
     <div class=" input-group input-group-md">

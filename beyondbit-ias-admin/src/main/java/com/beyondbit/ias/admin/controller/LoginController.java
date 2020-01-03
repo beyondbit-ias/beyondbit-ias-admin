@@ -30,7 +30,8 @@ public class LoginController extends BaseController {
     }
 
     @GetMapping("/login")
-    public String login() {
+    public String login(Model model) {
+        model.addAttribute("systemTitle",getWebConfig("ApplicationName"));
         return "login";
     }
 
