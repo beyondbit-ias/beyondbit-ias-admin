@@ -16,7 +16,7 @@ spring:
     active: default
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://32.0.1.206:3306/mhjr?serverTimezone=GMT%2B8&characterEncoding=utf8
+    url: jdbc:mysql://32.0.1.206:3306/MH_JRTJ?serverTimezone=GMT%2B8&characterEncoding=utf8
     username: root
     password: 111qqq!
   jackson:
@@ -59,7 +59,7 @@ mybatis:
   type-aliases-package: com.beyondbit.ias.*.entity
   configuration:
     map-underscore-to-camel-case: true
-  configuration-properties: { dbSchema: mhjr. }
+  configuration-properties: { dbSchema: MH_JRTJ. }
 
 pagehelper:
   helperDialect: mysql

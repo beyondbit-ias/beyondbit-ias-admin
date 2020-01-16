@@ -11,3 +11,11 @@ ias-security:
   excludeUrls: /webjars/**;/js/**;
   adminRole: admin
   maximumSessions: 2
+
+
+frconfig:
+  MainHost: https://202.96.220.147/oauth2.0/
+  Response_Type:  code
+  Scope:  read,write
+  Client_ID: MHCZ_453
+  Client_Secret:  12345678

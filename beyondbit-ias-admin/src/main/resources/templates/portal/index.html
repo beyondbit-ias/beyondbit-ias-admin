@@ -422,6 +422,7 @@
                 $("[lay-href]").click(function() {
                     var item=$(this);
                     //console.log("left click",item.attr("lay-href")+"1");
+                    $(".main-iframe[data-id='" + item.attr("code")+ "']").remove();
                     if(item.attr("lay-href") && item.attr("lay-href") !="" && $(".main-iframe[data-id='" + item.attr("code")+ "']").length ==0) {
                         //$(".layadmin-iframe").attr("src", item.attr("lay-href") + "?t=" + new Date().getTime());
                         //添加一个包含iframe的div
