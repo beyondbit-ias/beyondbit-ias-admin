@@ -2,6 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <title th:text="${systemTitle}"></title>
     <link rel="stylesheet" th:href="@{../webjars/layui/css/layui.css}"  media="all">
@@ -186,8 +188,8 @@
             <!--tab tips-->
             <div class="layui-tab" lay-filter="tab" lay-allowclose="true">
                 <ul class="layui-tab-title">
-                    <li lay-id="webpart" class="layui-this" id="webpartLi">
-                        <span class="ucm_iconfont ucm_icon-diannao" dataname="后台首页"></span>后台首页</li>
+                    <!--<li lay-id="webpart" class="layui-this" id="webpartLi">-->
+                        <!--<span class="ucm_iconfont ucm_icon-diannao" dataname="后台首页"></span>后台首页</li>-->
                 </ul>
 
             </div>
@@ -224,11 +226,11 @@
             </div>
         </div>
         <!-- 内容主体区域 -->
-        <div id="main" class="main">
-            <div class="main-iframe" data-id='webpart'>
-                <iframe src="../portal/default" frameborder="0" class="layadmin-iframe"></iframe>
-            </div>
-        </div>
+        <!--<div id="main" class="main">-->
+            <!--<div class="main-iframe" data-id='webpart'>-->
+                <!--<iframe src="../portal/default" frameborder="0" class="layadmin-iframe"></iframe>-->
+            <!--</div>-->
+        <!--</div>-->
 
 
     </div>
@@ -263,7 +265,7 @@
             var itemID=$thisLi.attr("lay-id");
             if(itemID!="webpart") {
                 var item = $("[code='" + itemID + "']");
-                console.log("item", item);
+                //console.log("item", item);
                 if (item.attr("lay-href") && item.attr("lay-href") != "") {
                     //$(".layadmin-iframe").attr("src", item.attr("lay-href")+"?t="+new Date().getTime());
                     //不刷新页面
@@ -353,7 +355,7 @@
         //菜单初始化
         $.getJSON("../portal/getMenu",{t:new Date().getTime()})
             .then(function(res){
-                console.log(res);
+                //console.log(res);
                 var menus=[];
                 res.forEach(function(item){
                     if(item.type=="Menu")
@@ -474,13 +476,16 @@
                 //初始化tab的width,不知道为什么加50
                 $(".layui-tab").width($(".tabRow").width()-$(".tabRightBlock").width()-$(".tabLeft").width()+50);
 
+                //默认左侧第一个菜单选中
+                $("[lay-href]:first").click();
+
                 //初始化顶部menu的width
                 function resizeTopMenu() {
                     //先移除更多
                     $(".layui-layout-left > .more").remove();
                     //topMenuAboutWidth是毛估估头部的宽度，但是最终的宽度还是要根据每个菜单li的宽度累加得出， -344是layui-layout-right的外部宽度，防止getUser获取没有完成时，宽度会比获取后的小很多
                     var topMenuAboutWidth=$(".layui-header").outerWidth() - $(".layui-logo").outerWidth() - $(".btnslimbox").outerWidth() - 344;
-                    console.log("" + $(".layui-header").width(), "-" + $(".layui-layout-right").width(), "=" + $(".layui-layout-left ").width());
+                    //console.log("" + $(".layui-header").width(), "-" + $(".layui-layout-right").width(), "=" + $(".layui-layout-left ").width());
                     var addWidth = 0;
                     var lastMenuIndex;
                     $(".layui-layout-left ").children(".layui-nav-item").each(function (index) {
@@ -490,7 +495,7 @@
                         if (addWidth + 100 > topMenuAboutWidth) {
                             //需要更多
                             lastMenuIndex = index;
-                            console.log(lastMenuIndex);
+                            //console.log(lastMenuIndex);
                             var $more = $("<li class=\"layui-nav-item more\"><a><span class='iconfont icongengduo'></span>更多</a></li>");
                             $more.insertBefore($(this));
                             $(".layui-layout-left ").width(addWidth-thisWidth+83);
@@ -522,11 +527,11 @@
         //快捷方式初始化
         $.getJSON("../shortcut/getList",{t:new Date().getTime()})
             .then(function(res){
-                console.log("getShortcutlist",res,res.length);
+                //console.log("getShortcutlist",res,res.length);
                 var ShortcutHTML="";
                 if(res.length>0) {
                     $.each(res, function (index, item) {
-                        console.log(item);
+                        //console.log(item);
                         ShortcutHTML += " <dd><a href='javascript:void(0);' ModularCode='" + item.modularcode + "'>" + item.modularname + "</a><i class='layui-icon layui-unselect layui-tab-close usershortcutclose' >&#x1006;</i></dd>";
 
                     })
@@ -550,7 +555,7 @@
                 src+="?t="+new Date().getTime();
                 $(".main-iframe[data-id='"+code+"']").children(".layadmin-iframe").attr("src",src);
             }
-            console.log(code,src);
+            //console.log(code,src);
 
 
         });
@@ -564,7 +569,7 @@
             shortcut.modularname = _laythis.children("span").attr("dataname");
             shortcut.modularcode = _laythis.attr("lay-id");
             shortcut.modularurl = $(".main-iframe[data-id='" + shortcut.modularcode + "'] > iframe").attr("src");
-            console.log( JSON.stringify(shortcut),shortcut);
+            //console.log( JSON.stringify(shortcut),shortcut);
             //layer.load();
             $.ajax({
                 url: '../shortcut/insert',
@@ -575,7 +580,7 @@
                 success: function (res) {
 
                     layer.closeAll("loading");
-                    console.log(res);
+                    //console.log(res);
                     if (res == "exist")
                         layer.msg("添加快捷方式失败，该快捷方式已存在！");
                     if (res == "loginfailed")
@@ -610,7 +615,7 @@
         //点击快捷方式的关闭按钮
         $("#UserShortcut").on("click",".usershortcutclose",function(){
             var code=$(this).prev().attr("modularcode");
-            console.log(code);
+            //console.log(code);
             var _this=$(this);
             $.ajax({
                 url: '../shortcut/delete',
@@ -621,12 +626,12 @@
                 success: function (res) {
 
                     layer.closeAll("loading");
-                    console.log(res);
+                    //console.log(res);
                     if (res == "loginfailed")
                         layer.msg("删除快捷方式失败，用户登录超时！");
                     if (res == "success") {
                         layer.msg("删除快捷方式成功！");
-                        console.log(_this,_this.parent());
+                        //console.log(_this,_this.parent());
                         _this.parent().remove();
 
                     }
